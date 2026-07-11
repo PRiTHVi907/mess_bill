@@ -271,8 +271,8 @@
     const saveStatus = document.getElementById('saveStatus');
     const daySummary = document.getElementById('daySummary');
     const roommateSummary = document.getElementById('roommateSummary');
-    const API_LOAD_URL = '/api/load';
-    const API_SAVE_URL = '/api/save';
+    const API_LOAD_URL = '/api/sync';
+    const API_SAVE_URL = '/api/sync';
 
     const mealDefinitions = [
       { key: 'breakfast', label: 'Breakfast', defaultPrice: 50 },
@@ -375,7 +375,7 @@
       const response = await fetch(API_SAVE_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
+          'Content-Type': 'application/json'
         },
         redirect: 'follow',
         body: JSON.stringify(payload)
@@ -683,16 +683,54 @@
     }
 
     function saveCurrentLog() {
-      const payload = buildSavePayload();
+      const newLog = buildSavePayload();
+      
+      if (newLog.roommateNames.length === 0) {
+        saveStatus.textContent = 'Please select at least one roommate.';
+        return;
+      }
 
-      postCloudLog(payload)
+      const day = newLog.day;
+      const newRoommates = new Set(newLog.roommateNames);
+      
+      const cleanedLogs = [];
+      cloudLogs.forEach((log) => {
+        if (log.day === day) {
+          const currRoommates = Array.isArray(log.roommateNames)
+            ? log.roommateNames
+            : (log.roommateName ? [log.roommateName] : []);
+            
+          const updatedRoommates = currRoommates.filter(r => !newRoommates.has(r));
+          if (updatedRoommates.length > 0) {
+            const updatedLog = { ...log };
+            updatedLog.roommateNames = updatedRoommates;
+            updatedLog.roommateName = updatedRoommates[0];
+            
+            let mealCost = 0;
+            const meals = updatedLog.meals || {};
+            for (const key in meals) {
+              if (meals[key] && meals[key].checked) {
+                mealCost += Number(meals[key].price || 0);
+              }
+            }
+            updatedLog.totalDailyRate = mealCost * updatedRoommates.length;
+            cleanedLogs.push(updatedLog);
+          }
+        } else {
+          cleanedLogs.push(log);
+        }
+      });
+      
+      cleanedLogs.push(newLog);
+
+      postCloudLog(cleanedLogs)
         .then(() => fetchCloudLogs())
         .then(() => {
-          saveStatus.textContent = `Saved ${activeDay} log for ${payload.roommateNames.length} roommate(s).`;
+          saveStatus.textContent = `Saved ${activeDay} log for ${newLog.roommateNames.length} roommate(s).`;
         })
         .catch((error) => {
           console.error('Cloud save failed', error);
-          saveStatus.textContent = 'Save failed. Check the Apps Script URL and deployment.';
+          saveStatus.textContent = 'Save failed. Check Vercel KV connection.';
         });
     }
 

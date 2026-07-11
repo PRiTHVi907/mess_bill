@@ -86,6 +86,16 @@ class MockServerRequestHandler(http.server.SimpleHTTPRequestHandler):
             response_data = {"status": "success", "rows": rows}
             self.wfile.write(json.dumps(response_data).encode('utf-8'))
             return
+
+        elif path == '/api/sync':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            rows = load_db()
+            self.wfile.write(json.dumps(rows).encode('utf-8'))
+            return
             
         # Default behavior: serve static file
         return super().do_GET()
@@ -117,19 +127,15 @@ class MockServerRequestHandler(http.server.SimpleHTTPRequestHandler):
             cleaned_logs = []
             for log in existing_logs:
                 if log.get('day') == day:
-                    # Check roommate overlap
                     curr_roommates = log.get('roommateNames', [])
                     if not curr_roommates and log.get('roommateName'):
                         curr_roommates = [log.get('roommateName')]
                     
-                    # Remove overlapping roommates
                     updated_roommates = [r for r in curr_roommates if r not in new_roommates]
                     if updated_roommates:
                         log['roommateNames'] = updated_roommates
                         if 'roommateName' in log and log['roommateName'] not in updated_roommates:
                             log['roommateName'] = updated_roommates[0]
-                        # Recalculate total daily rate for the updated record (since number of roommates changed)
-                        # We multiply the active meal prices by the new roommate count
                         meal_count = 0
                         meals = log.get('meals', {})
                         total_meals_price = 0
@@ -142,7 +148,6 @@ class MockServerRequestHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     cleaned_logs.append(log)
 
-            # Recalculate daily rate for new entry based on checked meals times number of roommates
             new_meal_price = 0
             new_meals = new_log.get('meals', {})
             for m_key, m_val in new_meals.items():
@@ -154,6 +159,28 @@ class MockServerRequestHandler(http.server.SimpleHTTPRequestHandler):
                 cleaned_logs.append(new_log)
 
             save_db(cleaned_logs)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "success", "message": "Saved successfully"}).encode('utf-8'))
+            return
+
+        elif path == '/api/sync':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            
+            try:
+                full_db = json.loads(post_data)
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": f"Invalid JSON: {str(e)}"}).encode('utf-8'))
+                return
+
+            save_db(full_db)
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
