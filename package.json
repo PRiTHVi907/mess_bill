@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Weekly Mess Bill Dashboard",
   "dependencies": {
-    "@vercel/kv": "^1.0.1"
+    "ioredis": "^5.4.1"
   },
   "scripts": {
     "start": "python3 dev_server.py"

@@ -1,4 +1,9 @@
-import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
+
+let redis;
+if (process.env.REDIS_URL) {
+  redis = new Redis(process.env.REDIS_URL);
+}
 
 export default async function handler(req, res) {
   // Set CORS headers for browser queries
@@ -9,6 +14,13 @@ export default async function handler(req, res) {
   // Handle preflight options request
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
+  }
+
+  if (!redis) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Missing REDIS_URL environment variable.'
+    });
   }
 
   try {
@@ -27,7 +39,8 @@ export default async function handler(req, res) {
         }
       }
 
-      await kv.set('mess_bill_data', payload);
+      // Store in Redis as a JSON string
+      await redis.set('mess_bill_data', JSON.stringify(payload));
       
       return res.status(200).json({
         status: 'success',
@@ -36,13 +49,14 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'GET') {
-      const data = await kv.get('mess_bill_data');
+      const rawData = await redis.get('mess_bill_data');
       
       // Handle missing data states gracefully (e.g. empty database)
-      if (data === null || data === undefined) {
+      if (!rawData) {
         return res.status(200).json([]);
       }
       
+      const data = JSON.parse(rawData);
       return res.status(200).json(data);
     }
 
@@ -54,7 +68,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Vercel KV Serverless function error:', error);
+    console.error('Redis Sync error:', error);
     return res.status(500).json({
       status: 'error',
       message: error.message || 'Internal Server Error'
