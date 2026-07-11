@@ -307,6 +307,7 @@
 
       const day = record.day || record.Day || '';
       const roommateName = record.roommateName || record.Roommate || record.roommate || '';
+      const roommateNames = record.roommateNames || record.friends || (roommateName ? [roommateName] : []);
       const meals = record.meals || record.Meals || {};
       const prices = record.prices || record.Prices || {};
       const totalDailyRate = Number(record.totalDailyRate ?? record.TotalDailyRate ?? record.total ?? 0);
@@ -315,6 +316,7 @@
       return {
         day,
         roommateName,
+        roommateNames,
         meals,
         prices,
         totalDailyRate,
