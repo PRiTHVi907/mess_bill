@@ -271,7 +271,8 @@
     const saveStatus = document.getElementById('saveStatus');
     const daySummary = document.getElementById('daySummary');
     const roommateSummary = document.getElementById('roommateSummary');
-    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const API_LOAD_URL = '/api/load';
+    const API_SAVE_URL = '/api/save';
 
     const mealDefinitions = [
       { key: 'breakfast', label: 'Breakfast', defaultPrice: 50 },
@@ -354,7 +355,7 @@
     }
 
     async function fetchCloudLogs() {
-      const response = await fetch(SCRIPT_URL, {
+      const response = await fetch(API_LOAD_URL, {
         method: 'GET',
         redirect: 'follow'
       });
@@ -371,7 +372,7 @@
     }
 
     async function postCloudLog(payload) {
-      const response = await fetch(SCRIPT_URL, {
+      const response = await fetch(API_SAVE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8'
