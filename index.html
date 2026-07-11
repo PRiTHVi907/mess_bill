@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mess Bill Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            amoled: '#000000',
+            card: '#121212',
+            text: '#ffffff',
+            neon: '#00f2fe'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-amoled text-text min-h-screen">
+  <button id="menuButton" class="fixed top-4 left-4 z-50 border border-neon text-neon rounded p-2 leading-none" aria-label="Open menu">☰</button>
+
+  <aside id="sidebar" class="fixed top-0 left-0 z-40 h-full w-72 bg-card border-r border-neon transform -translate-x-full transition-transform duration-200 p-6">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-xl font-semibold">Mess Bill</h1>
+      <button id="closeButton" class="text-neon text-xl" aria-label="Close menu">×</button>
+    </div>
+    <nav class="space-y-2">
+      <button data-view="homeView" class="nav-link w-full text-left px-4 py-3 rounded bg-neon text-black font-semibold">Home</button>
+      <button data-view="dayView" class="nav-link w-full text-left px-4 py-3 rounded bg-card border border-gray-700">Day-wise Bill</button>
+      <button data-view="roommateView" class="nav-link w-full text-left px-4 py-3 rounded bg-card border border-gray-700">Roommate-wise Bill</button>
+    </nav>
+  </aside>
+
+  <main class="min-h-screen">
+    <section id="homeView" class="view min-h-screen p-6 pt-20">
+      <h2 class="text-2xl font-semibold mb-6">Logging Dashboard</h2>
+      <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-8">
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-neon text-black font-semibold" data-day="Mon">Mon</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Tue">Tue</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Wed">Wed</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Thu">Thu</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Fri">Fri</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Sat">Sat</button>
+        <button class="day-tab px-3 py-2 rounded border border-gray-700 bg-card" data-day="Sun">Sun</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <button class="friend-card text-left p-5 rounded bg-card border border-gray-700" data-friend="Roommate 1">
+          <p class="font-semibold">Roommate 1</p>
+          <p class="text-sm text-gray-400 mt-1">Tap to include in batch edit</p>
+        </button>
+        <button class="friend-card text-left p-5 rounded bg-card border border-gray-700" data-friend="Roommate 2">
+          <p class="font-semibold">Roommate 2</p>
+          <p class="text-sm text-gray-400 mt-1">Tap to include in batch edit</p>
+        </button>
+        <button class="friend-card text-left p-5 rounded bg-card border border-gray-700" data-friend="Roommate 3">
+          <p class="font-semibold">Roommate 3</p>
+          <p class="text-sm text-gray-400 mt-1">Tap to include in batch edit</p>
+        </button>
+        <button class="friend-card text-left p-5 rounded bg-card border border-gray-700" data-friend="Roommate 4">
+          <p class="font-semibold">Roommate 4</p>
+          <p class="text-sm text-gray-400 mt-1">Tap to include in batch edit</p>
+        </button>
+        <button class="friend-card text-left p-5 rounded bg-card border border-gray-700" data-friend="Roommate 5">
+          <p class="font-semibold">Roommate 5</p>
+          <p class="text-sm text-gray-400 mt-1">Tap to include in batch edit</p>
+        </button>
+      </div>
+    </section>
+
+    <section id="dayView" class="view hidden min-h-screen p-6 pt-20">
+      <h2 class="text-2xl font-semibold mb-6">Day-wise Bill</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Mon</p><p class="text-gray-300 mt-2">Groceries + Milk</p></article>
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Tue</p><p class="text-gray-300 mt-2">Vegetables + Snacks</p></article>
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Wed</p><p class="text-gray-300 mt-2">Rice + Essentials</p></article>
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Thu</p><p class="text-gray-300 mt-2">Fruits + Bread</p></article>
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Fri</p><p class="text-gray-300 mt-2">Cleaning Supplies</p></article>
+        <article class="bg-card border border-gray-700 rounded p-4"><p class="font-semibold text-neon">Sat/Sun</p><p class="text-gray-300 mt-2">Weekend Top-up</p></article>
+      </div>
+    </section>
+
+    <section id="roommateView" class="view hidden min-h-screen p-6 pt-20">
+      <h2 class="text-2xl font-semibold mb-6">Roommate-wise Bill</h2>
+      <div class="space-y-3">
+        <article class="bg-card border border-gray-700 rounded p-4 flex items-center justify-between"><span>Roommate 1</span><span class="text-neon">₹ 1,120</span></article>
+        <article class="bg-card border border-gray-700 rounded p-4 flex items-center justify-between"><span>Roommate 2</span><span class="text-neon">₹ 980</span></article>
+        <article class="bg-card border border-gray-700 rounded p-4 flex items-center justify-between"><span>Roommate 3</span><span class="text-neon">₹ 1,045</span></article>
+        <article class="bg-card border border-gray-700 rounded p-4 flex items-center justify-between"><span>Roommate 4</span><span class="text-neon">₹ 1,000</span></article>
+        <article class="bg-card border border-gray-700 rounded p-4 flex items-center justify-between"><span>Roommate 5</span><span class="text-neon">₹ 1,075</span></article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('menuButton');
+    const closeButton = document.getElementById('closeButton');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const views = document.querySelectorAll('.view');
+    const dayTabs = document.querySelectorAll('.day-tab');
+    const friendCards = document.querySelectorAll('.friend-card');
+
+    const openSidebar = () => sidebar.classList.remove('-translate-x-full');
+    const closeSidebar = () => sidebar.classList.add('-translate-x-full');
+
+    menuButton.addEventListener('click', openSidebar);
+    closeButton.addEventListener('click', closeSidebar);
+
+    navLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        views.forEach((view) => view.classList.add('hidden'));
+        document.getElementById(link.dataset.view).classList.remove('hidden');
+
+        navLinks.forEach((btn) => btn.className = 'nav-link w-full text-left px-4 py-3 rounded bg-card border border-gray-700');
+        link.className = 'nav-link w-full text-left px-4 py-3 rounded bg-neon text-black font-semibold';
+        closeSidebar();
+      });
+    });
+
+    dayTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        dayTabs.forEach((btn) => btn.className = 'day-tab px-3 py-2 rounded border border-gray-700 bg-card');
+        tab.className = 'day-tab px-3 py-2 rounded border border-gray-700 bg-neon text-black font-semibold';
+      });
+    });
+
+    friendCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('border-neon');
+        card.classList.toggle('bg-neon');
+        card.classList.toggle('text-black');
+      });
+    });
+  </script>
+</body>
+</html>
