@@ -194,7 +194,7 @@
               <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
                 <input data-meal-checkbox="breakfast" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
                 <span class="min-w-0 flex-1 text-sm font-medium">Breakfast</span>
-                <input data-meal-input="breakfast" type="number" min="0" step="1" value="50" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
+                <input data-meal-input="breakfast" type="number" min="0" step="1" value="40" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
               </label>
               <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
                 <input data-meal-checkbox="lunch" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
@@ -204,7 +204,7 @@
               <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
                 <input data-meal-checkbox="dinner" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
                 <span class="min-w-0 flex-1 text-sm font-medium">Dinner</span>
-                <input data-meal-input="dinner" type="number" min="0" step="1" value="60" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
+                <input data-meal-input="dinner" type="number" min="0" step="1" value="40" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
               </label>
             </div>
           </div>
@@ -275,9 +275,9 @@
     const API_SAVE_URL = '/api/sync';
 
     const mealDefinitions = [
-      { key: 'breakfast', label: 'Breakfast', defaultPrice: 50 },
+      { key: 'breakfast', label: 'Breakfast', defaultPrice: 40 },
       { key: 'lunch', label: 'Lunch', defaultPrice: 60 },
-      { key: 'dinner', label: 'Dinner', defaultPrice: 60 }
+      { key: 'dinner', label: 'Dinner', defaultPrice: 40 }
     ];
 
     const mealControls = mealDefinitions.reduce((controls, meal) => {
@@ -604,15 +604,10 @@
     }
 
     function getDefaultDailyRate(selectedMealKeys) {
-      const signature = selectedMealKeys.slice().sort().join('|');
-
-      if (signature === 'breakfast|dinner|lunch') return 140;
-      if (signature === 'breakfast|lunch') return 100;
-      if (signature === 'dinner') return 60;
-      if (signature === 'breakfast') return 50;
-      if (signature === 'lunch') return 60;
-
-      return 0;
+      return selectedMealKeys.reduce((sum, key) => {
+        const meal = mealDefinitions.find(m => m.key === key);
+        return sum + (meal ? meal.defaultPrice : 0);
+      }, 0);
     }
 
     function updateDailyRate() {

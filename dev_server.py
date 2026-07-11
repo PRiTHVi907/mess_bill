@@ -12,12 +12,12 @@ DEFAULT_MOCK_DATA = [
         "roommateNames": ["Ashwin", "Devan", "Reno", "Sreesanth", "Sangeeth"],
         "roommateName": "Ashwin",
         "meals": {
-            "breakfast": {"checked": True, "price": 50, "manual": False},
+            "breakfast": {"checked": True, "price": 40, "manual": False},
             "lunch": {"checked": True, "price": 60, "manual": False},
-            "dinner": {"checked": True, "price": 60, "manual": False}
+            "dinner": {"checked": True, "price": 40, "manual": False}
         },
-        "prices": {"breakfast": 50, "lunch": 60, "dinner": 60},
-        "totalDailyRate": 170,
+        "prices": {"breakfast": 40, "lunch": 60, "dinner": 40},
+        "totalDailyRate": 700,
         "savedAt": "2026-07-11T12:00:00.000Z"
     },
     {
@@ -25,12 +25,12 @@ DEFAULT_MOCK_DATA = [
         "roommateNames": ["Ashwin", "Devan"],
         "roommateName": "Ashwin",
         "meals": {
-            "breakfast": {"checked": True, "price": 50, "manual": False},
+            "breakfast": {"checked": True, "price": 40, "manual": False},
             "lunch": {"checked": True, "price": 60, "manual": False},
-            "dinner": {"checked": False, "price": 60, "manual": False}
+            "dinner": {"checked": False, "price": 40, "manual": False}
         },
-        "prices": {"breakfast": 50, "lunch": 60, "dinner": 60},
-        "totalDailyRate": 110,
+        "prices": {"breakfast": 40, "lunch": 60, "dinner": 40},
+        "totalDailyRate": 200,
         "savedAt": "2026-07-11T12:05:00.000Z"
     },
     {
@@ -38,12 +38,12 @@ DEFAULT_MOCK_DATA = [
         "roommateNames": ["Reno", "Sreesanth"],
         "roommateName": "Reno",
         "meals": {
-            "breakfast": {"checked": False, "price": 50, "manual": False},
+            "breakfast": {"checked": False, "price": 40, "manual": False},
             "lunch": {"checked": False, "price": 60, "manual": False},
-            "dinner": {"checked": True, "price": 60, "manual": False}
+            "dinner": {"checked": True, "price": 40, "manual": False}
         },
-        "prices": {"breakfast": 50, "lunch": 60, "dinner": 60},
-        "totalDailyRate": 60,
+        "prices": {"breakfast": 40, "lunch": 60, "dinner": 40},
+        "totalDailyRate": 80,
         "savedAt": "2026-07-11T12:10:00.000Z"
     }
 ]
