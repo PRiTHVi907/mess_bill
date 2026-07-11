@@ -371,22 +371,6 @@
       return cloudLogs;
     }
 
-    async function postCloudLog(payload) {
-      const response = await fetch(API_SAVE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        redirect: 'follow',
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`POST ${response.status}`);
-      }
-
-      return response.json();
-    }
 
     function openSidebarMenu() {
       sidebar.classList.add('is-open');
@@ -723,15 +707,27 @@
       
       cleanedLogs.push(newLog);
 
-      postCloudLog(cleanedLogs)
-        .then(() => fetchCloudLogs())
-        .then(() => {
-          saveStatus.textContent = `Saved ${activeDay} log for ${newLog.roommateNames.length} roommate(s).`;
-        })
-        .catch((error) => {
-          console.error('Cloud save failed', error);
-          saveStatus.textContent = 'Save failed. Check Vercel KV connection.';
-        });
+      fetch('/api/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cleanedLogs)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`POST ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(() => fetchCloudLogs())
+      .then(() => {
+        saveStatus.textContent = `Saved ${activeDay} log for ${newLog.roommateNames.length} roommate(s).`;
+      })
+      .catch((error) => {
+        console.error('Cloud save failed', error);
+        saveStatus.textContent = 'Save failed. Check Vercel KV connection.';
+      });
     }
 
     function renderFriends() {
