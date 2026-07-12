@@ -1,12 +1,7 @@
-import Redis from 'ioredis';
-
-let redis;
-if (process.env.REDIS_URL) {
-  redis = new Redis(process.env.REDIS_URL);
-}
+import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
-  // Set CORS headers for browser queries
+  // Set CORS headers for compatibility
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -14,13 +9,6 @@ export default async function handler(req, res) {
   // Handle preflight options request
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
-  }
-
-  if (!redis) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'Missing REDIS_URL environment variable.'
-    });
   }
 
   try {
@@ -39,24 +27,23 @@ export default async function handler(req, res) {
         }
       }
 
-      // Store in Redis as a JSON string
-      await redis.set('mess_bill_data', JSON.stringify(payload));
+      // Store in Vercel KV
+      await kv.set('mess_bill_data', payload);
       
       return res.status(200).json({
         status: 'success',
-        message: 'Application state synchronized successfully.'
+        message: 'Saved successfully'
       });
     }
 
     if (req.method === 'GET') {
-      const rawData = await redis.get('mess_bill_data');
+      const data = await kv.get('mess_bill_data');
       
-      // Handle missing data states gracefully (e.g. empty database)
-      if (!rawData) {
+      // Handle missing data states gracefully
+      if (!data) {
         return res.status(200).json([]);
       }
       
-      const data = JSON.parse(rawData);
       return res.status(200).json(data);
     }
 
@@ -68,7 +55,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Redis Sync error:', error);
+    console.error('Vercel KV Sync error:', error);
     return res.status(500).json({
       status: 'error',
       message: error.message || 'Internal Server Error'
