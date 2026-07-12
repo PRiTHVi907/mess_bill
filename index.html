@@ -78,6 +78,15 @@
         <button id="viewDaysBtn" type="button" class="flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white">
           Days
         </button>
+        <button id="viewLogBtn" type="button" class="flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white">
+          Log Meals
+        </button>
+      </div>
+
+      <!-- Current Week Total Banner -->
+      <div class="mb-6 rounded-2xl border border-neon/20 bg-neon/5 px-4 py-3.5 text-xs font-semibold text-white/90 flex justify-between items-center shadow-[0_0_12px_rgba(0,242,254,0.02)]">
+        <span class="uppercase tracking-wider text-white/40 font-bold">Week Total Mess Bill</span>
+        <span id="weekTotal" class="text-neon font-extrabold text-sm">₹0</span>
       </div>
 
       <!-- Sync Status Header -->
@@ -99,6 +108,77 @@
           <!-- Day cards will be rendered here dynamically -->
         </div>
       </div>
+
+      <!-- Log Meals View -->
+      <div id="logView" class="hidden flex flex-col gap-6">
+        
+        <!-- Day Selector -->
+        <div class="rounded-3xl border border-white/10 bg-panel p-5">
+          <div class="mb-3 flex items-center justify-between">
+            <div class="text-[10px] uppercase tracking-[0.3em] text-white/35 font-bold">Day Selector</div>
+            <span id="selectedDayLabel" class="text-xs font-bold text-neon uppercase">Mon</span>
+          </div>
+          <div id="daysRow" class="grid grid-cols-4 gap-2 sm:grid-cols-7">
+            <!-- Day pills populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Roommates Grid -->
+        <div class="rounded-3xl border border-white/10 bg-panel p-5">
+          <div class="mb-3 flex items-center justify-between">
+            <div class="text-[10px] uppercase tracking-[0.3em] text-white/35 font-bold">Select Friends</div>
+            <span id="friendCount" class="text-xs text-white/50">0 selected</span>
+          </div>
+          <div id="friendsGrid" class="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <!-- Friend cards populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Meal Controls -->
+        <div class="rounded-3xl border border-white/10 bg-panel p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between border-b border-white/5 pb-3">
+            <div>
+              <div class="text-[10px] uppercase tracking-[0.3em] text-white/35 font-bold">Meal Control</div>
+              <div class="text-[10px] text-white/40 mt-0.5">Toggle meals or enter custom rates.</div>
+            </div>
+            <label class="flex cursor-pointer items-center gap-2 select-none">
+              <span class="text-xs text-white/70">Full Day</span>
+              <input id="fullDayToggle" type="checkbox" class="h-4 w-4 rounded border-white/20 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+            </label>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <!-- Breakfast -->
+            <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+              <input data-meal-checkbox="breakfast" type="checkbox" class="h-4.5 w-4.5 rounded border-white/20 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+              <span class="min-w-0 flex-1 text-sm font-medium">Breakfast</span>
+              <input data-meal-input="breakfast" type="number" min="0" step="1" value="50" class="w-20 rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-right text-xs text-white outline-none focus:border-neon transition" />
+            </label>
+
+            <!-- Lunch -->
+            <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+              <input data-meal-checkbox="lunch" type="checkbox" class="h-4.5 w-4.5 rounded border-white/20 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+              <span class="min-w-0 flex-1 text-sm font-medium">Lunch</span>
+              <input data-meal-input="lunch" type="number" min="0" step="1" value="60" class="w-20 rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-right text-xs text-white outline-none focus:border-neon transition" />
+            </label>
+
+            <!-- Dinner -->
+            <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
+              <input data-meal-checkbox="dinner" type="checkbox" class="h-4.5 w-4.5 rounded border-white/20 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+              <span class="min-w-0 flex-1 text-sm font-medium">Dinner</span>
+              <input data-meal-input="dinner" type="number" min="0" step="1" value="60" class="w-20 rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-right text-xs text-white outline-none focus:border-neon transition" />
+            </label>
+          </div>
+
+          <div class="mt-2 flex flex-col gap-2">
+            <button id="saveLogBtn" type="button" class="w-full rounded-2xl border border-neon bg-neon/15 px-5 py-4 text-sm font-bold text-neon shadow-[0_0_12px_rgba(0,242,254,0.02)] hover:bg-neon/25 transition duration-200">
+              Save Log
+            </button>
+            <div id="saveStatus" class="text-center text-[10px] uppercase tracking-wider text-white/45 min-h-[14px]"></div>
+          </div>
+        </div>
+
+      </div>
     </main>
 
     <!-- Footer -->
@@ -111,9 +191,9 @@
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const friends = ['Sangeeth', 'Devan', 'Sreesanth', 'Ashwin', 'Reno'];
     const mealDefinitions = [
-      { key: 'breakfast', label: 'Breakfast', defaultPrice: 40 },
+      { key: 'breakfast', label: 'Breakfast', defaultPrice: 50 },
       { key: 'lunch', label: 'Lunch', defaultPrice: 60 },
-      { key: 'dinner', label: 'Dinner', defaultPrice: 40 }
+      { key: 'dinner', label: 'Dinner', defaultPrice: 60 }
     ];
 
     const API_LOAD_URL = '/api/sync';
@@ -123,6 +203,36 @@
     let cloudLogs = [];
     const expandedRoommates = new Set(); // Tracks currently expanded cards
     const expandedDays = new Set(); // Tracks currently expanded day cards
+
+    // Log view elements & state
+    const logView = document.getElementById('logView');
+    const daysRow = document.getElementById('daysRow');
+    const friendsGrid = document.getElementById('friendsGrid');
+    const selectedDayLabel = document.getElementById('selectedDayLabel');
+    const friendCount = document.getElementById('friendCount');
+    const fullDayToggle = document.getElementById('fullDayToggle');
+    const saveLogBtn = document.getElementById('saveLogBtn');
+    const saveStatus = document.getElementById('saveStatus');
+    const weekTotal = document.getElementById('weekTotal');
+
+    const mealControls = mealDefinitions.reduce((controls, meal) => {
+      controls[meal.key] = {
+        checkbox: document.querySelector(`[data-meal-checkbox="${meal.key}"]`),
+        input: document.querySelector(`[data-meal-input="${meal.key}"]`)
+      };
+      return controls;
+    }, {});
+
+    let activeDay = 'Mon';
+    const selectedFriends = new Set();
+    const mealState = mealDefinitions.reduce((state, meal) => {
+      state[meal.key] = {
+        checked: false,
+        price: meal.defaultPrice,
+        manual: false
+      };
+      return state;
+    }, {});
 
     // Helper functions for date operations
     function getMonday(d) {
@@ -222,6 +332,7 @@
         buildWeekSelectorOptions();
         renderRoommatesList();
         renderDaysList();
+        updateWeekTotal();
       } catch (error) {
         console.error('Failed to load cloud logs:', error);
         syncIndicator.textContent = 'Sync Failed';
@@ -264,6 +375,68 @@
       
       select.value = previousValue;
       activeWeekStart = new Date(select.value + 'T00:00:00');
+    }
+
+    function renderDays() {
+      daysRow.innerHTML = '';
+      days.forEach(day => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = day;
+        
+        const isActive = (day === activeDay);
+        button.className = `rounded-2xl border px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition ${
+          isActive 
+            ? 'border-neon bg-neon/15 text-neon shadow-[0_0_8px_rgba(0,242,254,0.04)]' 
+            : 'border-white/10 bg-black/40 text-white/70 hover:border-white/20'
+        }`;
+        
+        button.addEventListener('click', () => {
+          activeDay = day;
+          selectedDayLabel.textContent = day;
+          renderDays();
+        });
+        
+        daysRow.appendChild(button);
+      });
+    }
+
+    function renderFriends() {
+      friendsGrid.innerHTML = '';
+      friends.forEach(friend => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        
+        const isSelected = selectedFriends.has(friend);
+        card.className = `friend-card flex flex-col justify-between rounded-2xl border p-3.5 text-left transition ${
+          isSelected 
+            ? 'border-neon bg-neon/15 text-neon shadow-[0_0_8px_rgba(0,242,254,0.04)]' 
+            : 'border-white/10 bg-black/40 text-white/70 hover:border-white/20'
+        }`;
+        
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold">${friend}</span>
+            <span class="text-[9px] uppercase tracking-wider text-neon">${isSelected ? '✓' : ''}</span>
+          </div>
+        `;
+        
+        card.addEventListener('click', () => {
+          if (selectedFriends.has(friend)) {
+            selectedFriends.delete(friend);
+          } else {
+            selectedFriends.add(friend);
+          }
+          renderFriends();
+          updateFriendCount();
+        });
+        
+        friendsGrid.appendChild(card);
+      });
+    }
+
+    function updateFriendCount() {
+      friendCount.textContent = `${selectedFriends.size} selected`;
     }
 
     // Main layout rendering: roommate directory and details logs
@@ -551,6 +724,88 @@
       });
     }
 
+    function updateWeekTotal() {
+      const startStr = formatDate(activeWeekStart);
+      const end = new Date(activeWeekStart);
+      end.setDate(end.getDate() + 6);
+      const endStr = formatDate(end);
+      
+      const activeWeekLogs = cloudLogs.filter(log => log.date >= startStr && log.date <= endStr);
+      const total = activeWeekLogs.reduce((sum, log) => {
+        let logCost = 0;
+        const count = Array.isArray(log.roommateNames) ? log.roommateNames.length : 1;
+        if (log.meals) {
+          ['breakfast', 'lunch', 'dinner'].forEach(k => {
+            if (log.meals[k] && log.meals[k].checked) {
+              logCost += Number(log.meals[k].price || 0);
+            }
+          });
+        }
+        return sum + (logCost * count);
+      }, 0);
+
+      weekTotal.textContent = formatCurrency(total);
+    }
+
+    function syncMealControls() {
+      mealDefinitions.forEach(meal => {
+        const state = mealState[meal.key];
+        const controls = mealControls[meal.key];
+        if (controls) {
+          controls.checkbox.checked = state.checked;
+          controls.input.value = state.price;
+          controls.input.classList.toggle('text-neon', state.manual);
+          controls.input.classList.toggle('border-neon', state.manual);
+        }
+      });
+
+      fullDayToggle.checked = mealDefinitions.every(meal => mealState[meal.key].checked);
+    }
+
+    function updateDefaultPricesBasedOnSelection() {
+      const selectedKeys = mealDefinitions.filter(m => mealState[m.key].checked).map(m => m.key);
+      const hasManual = mealDefinitions.some(m => mealState[m.key].manual);
+      
+      if (!hasManual) {
+        if (selectedKeys.length === 3) {
+          mealState.breakfast.price = 40;
+          mealState.lunch.price = 60;
+          mealState.dinner.price = 40;
+        } else if (selectedKeys.includes('breakfast') && selectedKeys.includes('lunch') && selectedKeys.length === 2) {
+          mealState.breakfast.price = 40;
+          mealState.lunch.price = 60;
+          mealState.dinner.price = 60;
+        } else {
+          mealState.breakfast.price = 50;
+          mealState.lunch.price = 60;
+          mealState.dinner.price = 60;
+        }
+      }
+    }
+
+    function handleMealToggle(mealKey, isChecked) {
+      mealState[mealKey].checked = isChecked;
+      updateDefaultPricesBasedOnSelection();
+      syncMealControls();
+    }
+
+    function handleMealPriceChange(mealKey, value) {
+      const numericValue = Number(value);
+      if (Number.isNaN(numericValue)) return;
+      
+      mealState[mealKey].price = numericValue;
+      mealState[mealKey].manual = true;
+      syncMealControls();
+    }
+
+    function setFullDayState(isChecked) {
+      mealDefinitions.forEach(meal => {
+        mealState[meal.key].checked = isChecked;
+      });
+      updateDefaultPricesBasedOnSelection();
+      syncMealControls();
+    }
+
     // Handles saving roommate's weekly logs compiled into JSON payload
     async function saveRoommateWeek(friend) {
       const statusLabel = document.getElementById(`status-${friend}`);
@@ -647,9 +902,115 @@
       }
     }
 
+    function getDateOfActiveDay(dayName) {
+      const dayIndex = days.indexOf(dayName);
+      const date = new Date(activeWeekStart);
+      date.setDate(date.getDate() + dayIndex);
+      return formatDate(date);
+    }
+
+    function saveCurrentLog() {
+      const selectedRoommates = Array.from(selectedFriends);
+      if (selectedRoommates.length === 0) {
+        saveStatus.textContent = 'Please select at least one roommate.';
+        return;
+      }
+
+      const activeDateStr = getDateOfActiveDay(activeDay);
+      const mealSnapshot = mealDefinitions.reduce((snapshot, meal) => {
+        snapshot[meal.key] = { ...mealState[meal.key] };
+        return snapshot;
+      }, {});
+
+      const dailyPriceSum = mealDefinitions.reduce((sum, meal) => {
+        if (mealState[meal.key].checked) {
+          return sum + Number(mealState[meal.key].price);
+        }
+        return sum;
+      }, 0);
+
+      const newLog = {
+        day: activeDay,
+        date: activeDateStr,
+        roommateNames: selectedRoommates,
+        roommateName: selectedRoommates[0] || '',
+        meals: mealSnapshot,
+        prices: mealDefinitions.reduce((snapshot, meal) => {
+          snapshot[meal.key] = Number(mealState[meal.key].price || 0);
+          return snapshot;
+        }, {}),
+        totalDailyRate: dailyPriceSum,
+        savedAt: new Date().toISOString()
+      };
+
+      saveStatus.textContent = 'Saving...';
+      saveStatus.className = 'text-center text-[10px] uppercase tracking-wider text-neon animate-pulse';
+
+      // Clean duplicate logs for these roommates on this specific day date
+      const cleanedLogs = [];
+      const newRoommatesSet = new Set(selectedRoommates);
+
+      cloudLogs.forEach(log => {
+        if (log.date === activeDateStr) {
+          const currRoommates = Array.isArray(log.roommateNames)
+            ? log.roommateNames
+            : (log.roommateName ? [log.roommateName] : []);
+          
+          const updatedRoommates = currRoommates.filter(r => !newRoommatesSet.has(r));
+          if (updatedRoommates.length > 0) {
+            const updatedLog = { ...log };
+            updatedLog.roommateNames = updatedRoommates;
+            updatedLog.roommateName = updatedRoommates[0];
+            
+            let logCost = 0;
+            if (updatedLog.meals) {
+              ['breakfast', 'lunch', 'dinner'].forEach(k => {
+                if (updatedLog.meals[k] && updatedLog.meals[k].checked) {
+                  logCost += Number(updatedLog.meals[k].price || 0);
+                }
+              });
+            }
+            updatedLog.totalDailyRate = logCost;
+            cleanedLogs.push(updatedLog);
+          }
+        } else {
+          cleanedLogs.push(log);
+        }
+      });
+
+      cleanedLogs.push(newLog);
+
+      fetch(API_SAVE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cleanedLogs)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error(`POST ${response.status}`);
+        return response.json();
+      })
+      .then(() => fetchCloudLogs())
+      .then(() => {
+        saveStatus.textContent = `Saved ${activeDay} log for ${selectedRoommates.length} roommate(s).`;
+        saveStatus.className = 'text-center text-[10px] uppercase tracking-wider text-neon';
+        setTimeout(() => {
+          saveStatus.textContent = '';
+        }, 3000);
+      })
+      .catch(error => {
+        console.error('Save log failed', error);
+        saveStatus.textContent = 'Save failed. Check connection.';
+        saveStatus.className = 'text-center text-[10px] uppercase tracking-wider text-red-400';
+      });
+    }
+
     // Tab View Toggle elements
     const btnRoommates = document.getElementById('viewRoommatesBtn');
     const btnDays = document.getElementById('viewDaysBtn');
+    const btnLog = document.getElementById('viewLogBtn');
+    
     const roommatesView = document.getElementById('roommatesView');
     const daysView = document.getElementById('daysView');
     const viewTitle = document.getElementById('viewTitle');
@@ -657,8 +1018,11 @@
     btnRoommates.addEventListener('click', () => {
       btnRoommates.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon';
       btnDays.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      btnLog.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      
       roommatesView.classList.remove('hidden');
       daysView.classList.add('hidden');
+      logView.classList.add('hidden');
       viewTitle.textContent = 'Roommates Directory';
       renderRoommatesList();
     });
@@ -666,10 +1030,29 @@
     btnDays.addEventListener('click', () => {
       btnDays.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon';
       btnRoommates.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      btnLog.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      
       roommatesView.classList.add('hidden');
       daysView.classList.remove('hidden');
+      logView.classList.add('hidden');
       viewTitle.textContent = 'Day-wise breakdown';
       renderDaysList();
+    });
+
+    btnLog.addEventListener('click', () => {
+      btnLog.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon';
+      btnRoommates.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      btnDays.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      
+      roommatesView.classList.add('hidden');
+      daysView.classList.add('hidden');
+      logView.classList.remove('hidden');
+      viewTitle.textContent = 'Meal Logging Panel';
+      
+      renderDays();
+      renderFriends();
+      updateFriendCount();
+      syncMealControls();
     });
 
     // Set dropdown change handler
@@ -677,12 +1060,35 @@
       activeWeekStart = new Date(e.target.value + 'T00:00:00');
       renderRoommatesList();
       renderDaysList();
+      updateWeekTotal();
+      if (!logView.classList.contains('hidden')) {
+        renderDays();
+        renderFriends();
+      }
     });
 
     // Initialize layout on window load
     window.addEventListener('load', () => {
       buildWeekSelectorOptions();
       fetchCloudLogs();
+
+      fullDayToggle.addEventListener('change', () => {
+        setFullDayState(fullDayToggle.checked);
+      });
+
+      mealDefinitions.forEach(meal => {
+        const controls = mealControls[meal.key];
+        if (controls) {
+          controls.checkbox.addEventListener('change', (e) => {
+            handleMealToggle(meal.key, e.target.checked);
+          });
+          controls.input.addEventListener('input', (e) => {
+            handleMealPriceChange(meal.key, e.target.value);
+          });
+        }
+      });
+
+      saveLogBtn.addEventListener('click', saveCurrentLog);
     });
   </script>
 </body>
