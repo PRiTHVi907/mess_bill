@@ -68,15 +68,36 @@
       </div>
     </header>
 
-    <!-- Main Roommates List (Home Page) -->
+    <!-- Main Content -->
     <main>
+      <!-- View Switcher Tabs -->
+      <div class="mb-6 flex rounded-2xl bg-panel p-1 border border-white/5">
+        <button id="viewRoommatesBtn" type="button" class="flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon">
+          Roommates
+        </button>
+        <button id="viewDaysBtn" type="button" class="flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white">
+          Days
+        </button>
+      </div>
+
+      <!-- Sync Status Header -->
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-xs uppercase tracking-[0.3em] text-white/35 font-bold">Roommates Directory</h2>
+        <h2 id="viewTitle" class="text-xs uppercase tracking-[0.3em] text-white/35 font-bold">Roommates Directory</h2>
         <span id="syncIndicator" class="text-[9px] uppercase tracking-[0.2em] text-white/45">Synced</span>
       </div>
-      
-      <div id="roommatesList" class="flex flex-col gap-4">
-        <!-- Roommate cards will be rendered here dynamically -->
+
+      <!-- Roommates View -->
+      <div id="roommatesView" class="flex flex-col gap-4">
+        <div id="roommatesList" class="flex flex-col gap-4">
+          <!-- Roommate cards will be rendered here dynamically -->
+        </div>
+      </div>
+
+      <!-- Days View -->
+      <div id="daysView" class="hidden">
+        <div id="daysList" class="flex flex-col gap-4">
+          <!-- Day cards will be rendered here dynamically -->
+        </div>
       </div>
     </main>
 
@@ -101,6 +122,7 @@
     let activeWeekStart = null;
     let cloudLogs = [];
     const expandedRoommates = new Set(); // Tracks currently expanded cards
+    const expandedDays = new Set(); // Tracks currently expanded day cards
 
     // Helper functions for date operations
     function getMonday(d) {
@@ -199,6 +221,7 @@
         // Re-generate dropdown menu options to capture new weeks
         buildWeekSelectorOptions();
         renderRoommatesList();
+        renderDaysList();
       } catch (error) {
         console.error('Failed to load cloud logs:', error);
         syncIndicator.textContent = 'Sync Failed';
@@ -415,6 +438,119 @@
       });
     }
 
+    // Day-wise layout rendering: 7-day schedule with cost breakdown and 'Who Ate When' expansion details
+    function renderDaysList() {
+      const daysList = document.getElementById('daysList');
+      daysList.innerHTML = '';
+
+      const startStr = formatDate(activeWeekStart);
+      const end = new Date(activeWeekStart);
+      end.setDate(end.getDate() + 6);
+      const endStr = formatDate(end);
+
+      // Filter all logs for the currently selected week date range
+      const activeWeekLogs = cloudLogs.filter(log => log.date >= startStr && log.date <= endStr);
+
+      days.forEach((dayName, idx) => {
+        const d = new Date(activeWeekStart);
+        d.setDate(d.getDate() + idx);
+        const dateStr = formatDate(d);
+        const fullDateLabel = `${dayName} - ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+        // Filter logs specifically for this date
+        const dayLogs = activeWeekLogs.filter(log => log.date === dateStr);
+
+        let breakfastCost = 0;
+        let lunchCost = 0;
+        let dinnerCost = 0;
+        
+        const breakfastRoommates = [];
+        const lunchRoommates = [];
+        const dinnerRoommates = [];
+
+        dayLogs.forEach(log => {
+          const meals = log.meals || {};
+          const roommateName = log.roommateName || log.roommateNames?.[0] || '';
+          
+          if (roommateName) {
+            if (meals.breakfast && meals.breakfast.checked) {
+              breakfastCost += Number(meals.breakfast.price || 0);
+              breakfastRoommates.push(roommateName);
+            }
+            if (meals.lunch && meals.lunch.checked) {
+              lunchCost += Number(meals.lunch.price || 0);
+              lunchRoommates.push(roommateName);
+            }
+            if (meals.dinner && meals.dinner.checked) {
+              dinnerCost += Number(meals.dinner.price || 0);
+              dinnerRoommates.push(roommateName);
+            }
+          }
+        });
+
+        const dayTotal = breakfastCost + lunchCost + dinnerCost;
+        const expanded = expandedDays.has(dateStr);
+
+        const card = document.createElement('div');
+        card.className = `border rounded-3xl bg-panel p-6 transition duration-200 cursor-pointer select-none ${
+          expanded ? 'border-neon/40 shadow-[0_0_16px_rgba(0,242,254,0.06)]' : 'border-white/10 hover:border-white/20'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-base font-bold text-white">${fullDateLabel}</h3>
+              <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/50">
+                <span>B: <span class="text-white/80">${formatCurrency(breakfastCost)}</span></span>
+                <span class="text-white/20">|</span>
+                <span>L: <span class="text-white/80">${formatCurrency(lunchCost)}</span></span>
+                <span class="text-white/20">|</span>
+                <span>D: <span class="text-white/80">${formatCurrency(dinnerCost)}</span></span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end gap-4 border-t border-white/5 pt-2 sm:border-0 sm:pt-0">
+              <span class="text-lg font-extrabold text-neon">${formatCurrency(dayTotal)}</span>
+              <span class="text-white/40 text-xs transition-transform duration-200 transform ${expanded ? 'rotate-180' : ''}">▼</span>
+            </div>
+          </div>
+          
+          ${expanded ? `
+            <div class="mt-5 border-t border-white/5 pt-5 text-xs space-y-3.5">
+              <div>
+                <div class="text-[10px] uppercase tracking-wider text-white/35 font-bold mb-1">Breakfast</div>
+                <div class="text-white/85 pl-2 border-l border-neon/30">
+                  - ${breakfastRoommates.length > 0 ? breakfastRoommates.join(', ') : 'None'}
+                </div>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase tracking-wider text-white/35 font-bold mb-1">Lunch</div>
+                <div class="text-white/85 pl-2 border-l border-neon/30">
+                  - ${lunchRoommates.length > 0 ? lunchRoommates.join(', ') : 'None'}
+                </div>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase tracking-wider text-white/35 font-bold mb-1">Dinner</div>
+                <div class="text-white/85 pl-2 border-l border-neon/30">
+                  - ${dinnerRoommates.length > 0 ? dinnerRoommates.join(', ') : 'None'}
+                </div>
+              </div>
+            </div>
+          ` : ''}
+        `;
+
+        card.addEventListener('click', () => {
+          if (expandedDays.has(dateStr)) {
+            expandedDays.delete(dateStr);
+          } else {
+            expandedDays.add(dateStr);
+          }
+          renderDaysList();
+        });
+
+        daysList.appendChild(card);
+      });
+    }
+
     // Handles saving roommate's weekly logs compiled into JSON payload
     async function saveRoommateWeek(friend) {
       const statusLabel = document.getElementById(`status-${friend}`);
@@ -511,10 +647,36 @@
       }
     }
 
+    // Tab View Toggle elements
+    const btnRoommates = document.getElementById('viewRoommatesBtn');
+    const btnDays = document.getElementById('viewDaysBtn');
+    const roommatesView = document.getElementById('roommatesView');
+    const daysView = document.getElementById('daysView');
+    const viewTitle = document.getElementById('viewTitle');
+
+    btnRoommates.addEventListener('click', () => {
+      btnRoommates.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon';
+      btnDays.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      roommatesView.classList.remove('hidden');
+      daysView.classList.add('hidden');
+      viewTitle.textContent = 'Roommates Directory';
+      renderRoommatesList();
+    });
+
+    btnDays.addEventListener('click', () => {
+      btnDays.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition bg-neon/15 text-neon';
+      btnRoommates.className = 'flex-1 rounded-xl py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition text-white/50 hover:text-white';
+      roommatesView.classList.add('hidden');
+      daysView.classList.remove('hidden');
+      viewTitle.textContent = 'Day-wise breakdown';
+      renderDaysList();
+    });
+
     // Set dropdown change handler
     document.getElementById('weekSelector').addEventListener('change', (e) => {
       activeWeekStart = new Date(e.target.value + 'T00:00:00');
       renderRoommatesList();
+      renderDaysList();
     });
 
     // Initialize layout on window load
