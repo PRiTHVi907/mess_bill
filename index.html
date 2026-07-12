@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ultra-minimalist mess bill dashboard" />
+  <meta name="description" content="Ultra-minimalist roommate mess bill manager" />
   <title>Mess Bill Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -28,280 +28,81 @@
     }
 
     html, body {
-      height: 100%;
-      margin: 0;
       background: #000000;
       color: #ffffff;
-      overflow: hidden;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .panel {
-      background: #121212;
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
     }
-
-    .view {
-      display: none;
-      height: 100%;
+    ::-webkit-scrollbar-track {
+      background: #000000;
     }
-
-    .view.is-active {
-      display: block;
+    ::-webkit-scrollbar-thumb {
+      background: #1f1f1f;
+      border-radius: 3px;
     }
-
-    .sidebar {
-      transform: translateX(-102%);
-      transition: transform 220ms ease;
-    }
-
-    .sidebar.is-open {
-      transform: translateX(0);
-    }
-
-    .overlay {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 220ms ease;
-    }
-
-    .overlay.is-visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .active-pill,
-    .active-card,
-    .nav-link.is-active {
-      color: #00f2fe;
-      background: rgba(0, 242, 254, 0.12);
-      box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.95), 0 0 24px rgba(0, 242, 254, 0.12);
-    }
-
-    .scrollbar-none::-webkit-scrollbar {
-      display: none;
-    }
-
-    .scrollbar-none {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2a2a2a;
     }
   </style>
 </head>
-<body>
-  <div class="relative h-screen w-screen overflow-hidden bg-black text-white">
-    <div id="overlay" class="overlay fixed inset-0 z-30 bg-black/70 backdrop-blur-[2px]"></div>
-
-    <aside id="sidebar" class="sidebar fixed left-0 top-0 z-40 h-full w-80 border-r border-white/10 bg-panel shadow-2xl">
-      <div class="flex h-full flex-col gap-4 p-4">
-        <div class="flex items-center justify-between border-b border-white/10 pb-4">
-          <div>
-            <div class="text-[10px] uppercase tracking-[0.45em] text-white/40">Navigation</div>
-            <h1 class="mt-1 text-lg font-semibold">Mess Billing</h1>
-          </div>
-          <button id="closeSidebarBtn" type="button" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-white/75 transition hover:border-neon hover:text-neon" aria-label="Close navigation menu">
-            ✕
-          </button>
-        </div>
-
-        <nav class="flex flex-col gap-3 pt-2">
-          <button type="button" class="nav-link is-active rounded-2xl border border-white/10 px-4 py-3 text-left text-sm font-medium transition hover:border-neon hover:text-neon" data-view="home">
-            Home
-          </button>
-          <button type="button" class="nav-link rounded-2xl border border-white/10 px-4 py-3 text-left text-sm font-medium transition hover:border-neon hover:text-neon" data-view="day">
-            Day-wise Bill
-          </button>
-          <button type="button" class="nav-link rounded-2xl border border-white/10 px-4 py-3 text-left text-sm font-medium transition hover:border-neon hover:text-neon" data-view="roommate">
-            Roommate-wise Bill
-          </button>
-          <button type="button" class="nav-link rounded-2xl border border-white/10 px-4 py-3 text-left text-sm font-medium transition hover:border-neon hover:text-neon" data-view="monthly">
-            Monthly Summary
-          </button>
-        </nav>
-
-        <div class="mt-auto rounded-3xl border border-white/10 bg-black/40 p-4">
-          <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Theme</div>
-          <div class="mt-2 text-sm leading-6 text-white/70">
-            AMOLED black, neon cyan accents, and clean batch editing controls.
-          </div>
-        </div>
+<body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-abyss text-white">
+  <div class="mx-auto max-w-2xl">
+    
+    <!-- Header -->
+    <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-6">
+      <div>
+        <div class="text-[10px] uppercase tracking-[0.45em] text-white/40 font-semibold">Minimalist Dashboard</div>
+        <h1 class="text-3xl font-extrabold text-white mt-1">Mess Billing</h1>
       </div>
-    </aside>
-
-    <header class="absolute left-0 top-0 z-20 flex w-full items-center justify-between border-b border-white/10 bg-black/85 px-4 py-3 backdrop-blur-md">
-      <button id="openSidebarBtn" type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-panel text-white/80 transition hover:border-neon hover:text-neon" aria-label="Open navigation menu">
-        ☰
-      </button>
-      <div class="text-right">
-        <div class="text-[10px] uppercase tracking-[0.45em] text-white/35">Ultra Minimalist</div>
-        <div class="text-sm text-white/80">Weekly Mess Dashboard</div>
+      
+      <!-- Week Selector Dropdown -->
+      <div class="flex flex-col gap-1.5 min-w-[240px]">
+        <label for="weekSelector" class="text-[9px] uppercase tracking-[0.25em] text-white/35 font-bold">Select Week</label>
+        <select id="weekSelector" class="w-full rounded-2xl border border-white/10 bg-panel px-4 py-3.5 text-sm text-white outline-none focus:border-neon focus:ring-1 focus:ring-neon transition duration-200 cursor-pointer">
+          <!-- Populated dynamically -->
+        </select>
       </div>
     </header>
 
-    <main class="relative z-10 h-full w-full pt-16">
-      <section id="homeView" class="view is-active h-full overflow-y-auto scrollbar-none px-4 pb-6">
-        <div class="mx-auto flex min-h-full max-w-6xl flex-col gap-4">
-          <div class="rounded-3xl border border-white/10 bg-panel p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Home</div>
-                <h2 class="mt-1 text-2xl font-semibold">The Logging Dashboard</h2>
-              </div>
-              <div class="rounded-full border border-neon/30 bg-neon/10 px-3 py-1 text-xs font-medium text-neon">
-                Batch selection ready
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-3xl border border-white/10 bg-panel p-4">
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Week Selector</div>
-                <div class="mt-1 flex items-center gap-2">
-                  <button id="prevWeekBtn" type="button" class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 text-white/70 hover:border-neon hover:text-neon transition" aria-label="Previous week">
-                    ←
-                  </button>
-                  <span id="weekRangeLabel" class="text-sm font-medium text-white/95">...</span>
-                  <button id="nextWeekBtn" type="button" class="grid h-8 w-8 place-items-center rounded-lg border border-white/10 text-white/70 hover:border-neon hover:text-neon transition" aria-label="Next week">
-                    →
-                  </button>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Day Selector</div>
-                <div id="selectedDayLabel" class="mt-1 text-sm font-medium text-neon">Mon</div>
-              </div>
-            </div>
-            <div id="daysRow" class="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7"></div>
-            <div class="mt-4 rounded-2xl border border-neon/20 bg-neon/5 px-4 py-3 text-sm font-medium text-white/90">
-              Current Week Total Mess Bill: <span id="weekTotal" class="text-neon">0</span> INR
-            </div>
-          </div>
-
-          <div class="flex-1 rounded-3xl border border-white/10 bg-panel p-4">
-            <div class="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Friends</div>
-                <div class="text-sm text-white/60">Tap multiple cards to batch edit.</div>
-              </div>
-              <div id="friendCount" class="text-sm text-white/70">0 selected</div>
-            </div>
-            <div id="friendsGrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"></div>
-          </div>
-
-          <div class="rounded-3xl border border-white/10 bg-panel p-4">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Meal Control</div>
-                <div class="text-sm text-white/60">Set meal selections and override prices for the selected day.</div>
-              </div>
-              <div class="rounded-full border border-neon/30 bg-neon/10 px-3 py-1 text-xs font-medium text-neon">
-                Daily Rate: <span id="dailyRateValue">0</span> INR
-              </div>
-            </div>
-
-            <label class="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
-              <span class="text-sm font-medium">Full Day</span>
-              <input id="fullDayToggle" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
-            </label>
-
-            <div class="mt-3 grid gap-3 md:grid-cols-3">
-              <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
-                <input data-meal-checkbox="breakfast" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
-                <span class="min-w-0 flex-1 text-sm font-medium">Breakfast</span>
-                <input data-meal-input="breakfast" type="number" min="0" step="1" value="40" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
-              </label>
-              <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
-                <input data-meal-checkbox="lunch" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
-                <span class="min-w-0 flex-1 text-sm font-medium">Lunch</span>
-                <input data-meal-input="lunch" type="number" min="0" step="1" value="60" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
-              </label>
-              <label class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3">
-                <input data-meal-checkbox="dinner" type="checkbox" class="h-5 w-5 rounded border-white/20" style="accent-color:#00f2fe" />
-                <span class="min-w-0 flex-1 text-sm font-medium">Dinner</span>
-                <input data-meal-input="dinner" type="number" min="0" step="1" value="40" class="w-20 rounded-xl border border-white/10 bg-black/70 px-3 py-2 text-right text-sm text-white outline-none transition focus:border-neon focus:ring-1 focus:ring-neon" />
-              </label>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-3 pb-1">
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button id="saveLogBtn" type="button" class="rounded-2xl border border-neon bg-neon/15 px-5 py-4 text-sm font-semibold text-neon shadow-[0_0_0_1px_rgba(0,242,254,0.85),0_0_28px_rgba(0,242,254,0.15)] transition hover:bg-neon/20">
-                Save Log
-              </button>
-              <button id="resetWeekBtn" type="button" class="rounded-2xl border border-red-500/50 bg-red-500/10 px-5 py-4 text-sm font-semibold text-red-400 transition hover:bg-red-500/25 hover:border-red-500">
-                Clear Current Week
-              </button>
-            </div>
-            <div id="saveStatus" class="min-h-5 text-xs uppercase tracking-[0.35em] text-white/35"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="dayView" class="view h-full overflow-y-auto scrollbar-none px-4 pb-6">
-        <div class="mx-auto flex min-h-full max-w-6xl items-center justify-center">
-          <div class="w-full rounded-3xl border border-white/10 bg-panel p-8 text-center">
-            <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Day-wise Bill</div>
-            <h2 class="mt-3 text-3xl font-semibold">Weekly breakdown grouped by days</h2>
-            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/60">
-              Weekly totals by day, with meal-level cost breakdowns derived from saved Home logs.
-            </p>
-            <div id="daySummary" class="mt-6 overflow-x-auto text-left"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="roommateView" class="view h-full overflow-y-auto scrollbar-none px-4 pb-6">
-        <div class="mx-auto flex min-h-full max-w-6xl items-center justify-center">
-          <div class="w-full rounded-3xl border border-white/10 bg-panel p-8 text-center">
-            <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Roommate-wise Bill</div>
-            <h2 class="mt-3 text-3xl font-semibold">Weekly breakdown grouped by person</h2>
-            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/60">
-              Weekly accumulated bills for each roommate, with a dropdown-style meal count breakdown.
-            </p>
-            <div id="roommateSummary" class="mt-6 grid gap-3 text-left"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="monthlyView" class="view h-full overflow-y-auto scrollbar-none px-4 pb-6">
-        <div class="mx-auto flex min-h-full max-w-6xl items-center justify-center">
-          <div class="w-full rounded-3xl border border-white/10 bg-panel p-8 text-center">
-            <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Monthly Summary</div>
-            <h2 class="mt-3 text-3xl font-semibold">Monthly accumulated roommate bills</h2>
-            <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/60">
-              Monthly breakdown of meal counts and total expenses per person across weeks.
-            </p>
-            <div id="monthlySummary" class="mt-6 grid gap-3 text-left"></div>
-          </div>
-        </div>
-      </section>
+    <!-- Main Roommates List (Home Page) -->
+    <main>
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xs uppercase tracking-[0.3em] text-white/35 font-bold">Roommates Directory</h2>
+        <span id="syncIndicator" class="text-[9px] uppercase tracking-[0.2em] text-white/45">Synced</span>
+      </div>
+      
+      <div id="roommatesList" class="flex flex-col gap-4">
+        <!-- Roommate cards will be rendered here dynamically -->
+      </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-[10px] uppercase tracking-[0.3em] text-white/20 border-t border-white/5 pt-6">
+      Roommate Mess Manager &bull; Powered by Vercel KV
+    </footer>
   </div>
 
   <script>
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const friends = ['Ashwin', 'Devan', 'Reno', 'Sreesanth', 'Sangeeth'];
+    const friends = ['Sangeeth', 'Devan', 'Sreesanth', 'Ashwin', 'Reno'];
+    const mealDefinitions = [
+      { key: 'breakfast', label: 'Breakfast', defaultPrice: 40 },
+      { key: 'lunch', label: 'Lunch', defaultPrice: 60 },
+      { key: 'dinner', label: 'Dinner', defaultPrice: 40 }
+    ];
 
-    const openSidebarBtn = document.getElementById('openSidebarBtn');
-    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-    const overlay = document.getElementById('overlay');
-    const sidebar = document.getElementById('sidebar');
-    const navLinks = Array.from(document.querySelectorAll('.nav-link'));
-    const views = {
-      home: document.getElementById('homeView'),
-      day: document.getElementById('dayView'),
-      roommate: document.getElementById('roommateView'),
-      monthly: document.getElementById('monthlyView')
-    };
+    const API_LOAD_URL = '/api/sync';
+    const API_SAVE_URL = '/api/sync';
 
-    // Week selector elements
-    const prevWeekBtn = document.getElementById('prevWeekBtn');
-    const nextWeekBtn = document.getElementById('nextWeekBtn');
-    const weekRangeLabel = document.getElementById('weekRangeLabel');
-    const resetWeekBtn = document.getElementById('resetWeekBtn');
-    const monthlySummary = document.getElementById('monthlySummary');
+    let activeWeekStart = null;
+    let cloudLogs = [];
+    const expandedRoommates = new Set(); // Tracks currently expanded cards
 
-    // Date state management helpers
+    // Helper functions for date operations
     function getMonday(d) {
       d = new Date(d);
       const day = d.getDay();
@@ -318,28 +119,11 @@
       return `${year}-${month}-${date}`;
     }
 
-    let activeWeekStart = getMonday(new Date());
-
-    function getDateOfActiveDay(dayName) {
-      const dayIndex = days.indexOf(dayName);
-      const date = new Date(activeWeekStart);
-      date.setDate(date.getDate() + dayIndex);
-      return formatDate(date);
-    }
-
-    function getActiveWeekLogs() {
-      const startStr = formatDate(activeWeekStart);
-      const end = new Date(activeWeekStart);
+    function getWeekRangeStr(mondayStr) {
+      const start = new Date(mondayStr);
+      const end = new Date(mondayStr);
       end.setDate(end.getDate() + 6);
-      const endStr = formatDate(end);
-      return cloudLogs.filter(log => log.date >= startStr && log.date <= endStr);
-    }
-
-    function updateWeekDisplay() {
-      const start = activeWeekStart;
-      const end = new Date(activeWeekStart);
-      end.setDate(end.getDate() + 6);
-
+      
       const options = { month: 'short', day: 'numeric' };
       const startLabel = start.toLocaleDateString('en-US', options);
       const endLabel = end.toLocaleDateString('en-US', { 
@@ -347,57 +131,17 @@
         day: 'numeric' 
       });
       const yearLabel = end.getFullYear();
-
-      weekRangeLabel.textContent = `${startLabel} - ${endLabel}, ${yearLabel}`;
+      
+      return `${startLabel} - ${endLabel}, ${yearLabel}`;
     }
-    const daysRow = document.getElementById('daysRow');
-    const friendsGrid = document.getElementById('friendsGrid');
-    const selectedDayLabel = document.getElementById('selectedDayLabel');
-    const weekTotal = document.getElementById('weekTotal');
-    const friendCount = document.getElementById('friendCount');
-    const fullDayToggle = document.getElementById('fullDayToggle');
-    const dailyRateValue = document.getElementById('dailyRateValue');
-    const saveLogBtn = document.getElementById('saveLogBtn');
-    const saveStatus = document.getElementById('saveStatus');
-    const daySummary = document.getElementById('daySummary');
-    const roommateSummary = document.getElementById('roommateSummary');
-    const API_LOAD_URL = '/api/sync';
-    const API_SAVE_URL = '/api/sync';
 
-    const mealDefinitions = [
-      { key: 'breakfast', label: 'Breakfast', defaultPrice: 40 },
-      { key: 'lunch', label: 'Lunch', defaultPrice: 60 },
-      { key: 'dinner', label: 'Dinner', defaultPrice: 40 }
-    ];
-
-    const mealControls = mealDefinitions.reduce((controls, meal) => {
-      controls[meal.key] = {
-        checkbox: document.querySelector(`[data-meal-checkbox="${meal.key}"]`),
-        input: document.querySelector(`[data-meal-input="${meal.key}"]`)
-      };
-      return controls;
-    }, {});
-
-    let activeDay = 'Mon';
-    const selectedFriends = new Set();
-    const mealState = mealDefinitions.reduce((state, meal) => {
-      state[meal.key] = {
-        checked: false,
-        price: meal.defaultPrice,
-        manual: false
-      };
-      return state;
-    }, {});
-    let cloudLogs = [];
-
+    // Normalizes records returning from the API database
     function normalizeCloudRecord(record) {
-      if (!record) {
-        return null;
-      }
+      if (!record) return null;
 
       const day = record.day || record.Day || '';
       let date = record.date || record.Date || '';
-      if (!date && day) {
+      if (!date && day && activeWeekStart) {
         const idx = days.indexOf(day);
         if (idx !== -1) {
           const fallbackDate = new Date(activeWeekStart);
@@ -428,632 +172,355 @@
       return (records || []).map(normalizeCloudRecord).filter(Boolean);
     }
 
-    function getCloudWeekTotal() {
-      const activeLogs = getActiveWeekLogs();
-      return activeLogs.reduce((sum, entry) => sum + Number(entry.totalDailyRate || 0), 0);
-    }
-
-    function getSelectedFriendsSnapshot() {
-      return Array.from(selectedFriends);
-    }
-
-    function buildSavePayload() {
-      const mealSnapshot = mealDefinitions.reduce((snapshot, meal) => {
-        snapshot[meal.key] = { ...mealState[meal.key] };
-        return snapshot;
-      }, {});
-
-      return {
-        day: activeDay,
-        date: getDateOfActiveDay(activeDay),
-        roommateNames: getSelectedFriendsSnapshot(),
-        roommateName: getSelectedFriendsSnapshot()[0] || '',
-        meals: mealSnapshot,
-        prices: mealDefinitions.reduce((snapshot, meal) => {
-          snapshot[meal.key] = Number(mealState[meal.key].price || 0);
-          return snapshot;
-        }, {}),
-        totalDailyRate: updateDailyRate(),
-        savedAt: new Date().toISOString()
-      };
-    }
-
-    async function fetchCloudLogs() {
-      const response = await fetch(API_LOAD_URL, {
-        method: 'GET',
-        redirect: 'follow'
-      });
-
-      if (!response.ok) {
-        throw new Error(`GET ${response.status}`);
-      }
-
-      const data = await response.json();
-      const records = Array.isArray(data) ? data : Array.isArray(data.records) ? data.records : Array.isArray(data.rows) ? data.rows : [];
-      cloudLogs = normalizeCloudRecords(records);
-      refreshSummaryViews();
-      return cloudLogs;
-    }
-
-
-    function openSidebarMenu() {
-      sidebar.classList.add('is-open');
-      overlay.classList.add('is-visible');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeSidebarMenu() {
-      sidebar.classList.remove('is-open');
-      overlay.classList.remove('is-visible');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function setActiveView(viewName) {
-      Object.entries(views).forEach(([name, element]) => {
-        element.classList.toggle('is-active', name === viewName);
-      });
-
-      navLinks.forEach((link) => {
-        link.classList.toggle('is-active', link.dataset.view === viewName);
-      });
-    }
-
-    function renderDays() {
-      daysRow.innerHTML = '';
-
-      days.forEach((day) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = day;
-        button.className = 'day-pill rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-medium text-white/75 transition hover:border-neon hover:text-neon';
-
-        if (day === activeDay) {
-          button.classList.add('active-pill');
-        }
-
-        button.addEventListener('click', () => {
-          activeDay = day;
-          selectedDayLabel.textContent = day;
-          renderDays();
-        });
-
-        daysRow.appendChild(button);
-      });
-    }
-
-    function updateFriendCount() {
-      friendCount.textContent = `${selectedFriends.size} selected`;
-    }
-
-    function updateWeekTotal() {
-      const total = getCloudWeekTotal();
-      weekTotal.textContent = total;
-      return total;
-    }
-
     function formatCurrency(value) {
       return `₹${Number(value || 0).toFixed(0)}`;
     }
 
-    function renderDaySummary() {
-      const activeWeekLogs = getActiveWeekLogs();
-      const summaryRows = days.map((day) => {
-        const logsForDay = activeWeekLogs.filter((entry) => entry.day === day);
+    // Fetch logs from the API database
+    async function fetchCloudLogs() {
+      const syncIndicator = document.getElementById('syncIndicator');
+      syncIndicator.textContent = 'Syncing...';
+      syncIndicator.className = 'text-[9px] uppercase tracking-[0.2em] text-neon animate-pulse';
 
-        return logsForDay.reduce((accumulator, log) => {
-          const selectedCount = Array.isArray(log.roommateNames)
-            ? log.roommateNames.length
-            : Array.isArray(log.friends)
-              ? log.friends.length
-              : log.roommateName
-                ? 1
-                : 0;
-          const meals = log.meals || {};
-
-          ['breakfast', 'lunch', 'dinner'].forEach((mealKey) => {
-            const meal = meals[mealKey];
-            if (!meal || !meal.checked) {
-              return;
-            }
-
-            const mealCost = Number(meal.price || 0) * selectedCount;
-            accumulator.roommates += selectedCount;
-            accumulator.total += mealCost;
-            accumulator[mealKey].count += selectedCount;
-            accumulator[mealKey].cost += mealCost;
-          });
-
-          return accumulator;
-        }, {
-          day,
-          roommates: 0,
-          total: 0,
-          breakfast: { count: 0, cost: 0 },
-          lunch: { count: 0, cost: 0 },
-          dinner: { count: 0, cost: 0 }
+      try {
+        const response = await fetch(API_LOAD_URL, {
+          method: 'GET',
+          redirect: 'follow'
         });
-      });
 
-      if (!summaryRows.some((row) => row.total > 0)) {
-        daySummary.innerHTML = `
-          <div class="rounded-2xl border border-white/10 bg-black/40 px-4 py-5 text-sm text-white/55">
-            No logs saved yet. Add a Home entry to populate the weekly day summary.
-          </div>
-        `;
-        return;
+        if (!response.ok) throw new Error(`GET ${response.status}`);
+
+        const data = await response.json();
+        cloudLogs = normalizeCloudRecords(data);
+        
+        syncIndicator.textContent = 'Synced';
+        syncIndicator.className = 'text-[9px] uppercase tracking-[0.2em] text-white/45';
+        
+        // Re-generate dropdown menu options to capture new weeks
+        buildWeekSelectorOptions();
+        renderRoommatesList();
+      } catch (error) {
+        console.error('Failed to load cloud logs:', error);
+        syncIndicator.textContent = 'Sync Failed';
+        syncIndicator.className = 'text-[9px] uppercase tracking-[0.2em] text-red-400';
       }
-
-      daySummary.innerHTML = `
-        <table class="min-w-full border-separate border-spacing-y-3 text-sm">
-          <thead>
-            <tr class="text-[10px] uppercase tracking-[0.4em] text-white/35">
-              <th class="px-3 py-2 text-left">Day</th>
-              <th class="px-3 py-2 text-left">Roommates</th>
-              <th class="px-3 py-2 text-left">Breakfast</th>
-              <th class="px-3 py-2 text-left">Lunch</th>
-              <th class="px-3 py-2 text-left">Dinner</th>
-              <th class="px-3 py-2 text-left">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${summaryRows.map((row) => `
-              <tr class="rounded-2xl border border-white/10 bg-black/40">
-                <td class="rounded-l-2xl px-3 py-4 font-medium text-white">${row.day}</td>
-                <td class="px-3 py-4 text-white/75">${row.roommates}</td>
-                <td class="px-3 py-4 text-white/75">
-                  <div class="flex flex-col gap-1">
-                    <span>${formatCurrency(row.breakfast.cost)}</span>
-                    <span class="text-[10px] uppercase tracking-[0.3em] text-white/35">${row.breakfast.count} eats</span>
-                  </div>
-                </td>
-                <td class="px-3 py-4 text-white/75">
-                  <div class="flex flex-col gap-1">
-                    <span>${formatCurrency(row.lunch.cost)}</span>
-                    <span class="text-[10px] uppercase tracking-[0.3em] text-white/35">${row.lunch.count} eats</span>
-                  </div>
-                </td>
-                <td class="px-3 py-4 text-white/75">
-                  <div class="flex flex-col gap-1">
-                    <span>${formatCurrency(row.dinner.cost)}</span>
-                    <span class="text-[10px] uppercase tracking-[0.3em] text-white/35">${row.dinner.count} eats</span>
-                  </div>
-                </td>
-                <td class="rounded-r-2xl px-3 py-4 font-semibold text-neon">${formatCurrency(row.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
     }
 
-    function renderRoommateSummary() {
-      const activeWeekLogs = getActiveWeekLogs();
-      const summaryRows = friends.map((friend) => {
-        return activeWeekLogs.reduce((accumulator, log) => {
-          const meals = log.meals || {};
-          const roommateNames = Array.isArray(log.roommateNames)
-            ? log.roommateNames
-            : Array.isArray(log.friends)
-              ? log.friends
-              : log.roommateName
-                ? [log.roommateName]
-                : [];
-          const ateThatDay = roommateNames.includes(friend);
-
-          if (!ateThatDay) {
-            return accumulator;
-          }
-
-          ['breakfast', 'lunch', 'dinner'].forEach((mealKey) => {
-            const meal = meals[mealKey];
-            if (!meal || !meal.checked) {
-              return;
-            }
-
-            accumulator.total += Number(meal.price || 0);
-            accumulator[mealKey] += 1;
-          });
-
-          return accumulator;
-        }, {
-          friend,
-          total: 0,
-          breakfast: 0,
-          lunch: 0,
-          dinner: 0
-        });
+    // Dynamic dropdown weeks list generator
+    function buildWeekSelectorOptions() {
+      const currentMonday = getMonday(new Date());
+      const currentMondayStr = formatDate(currentMonday);
+      
+      const weeksSet = new Set();
+      weeksSet.add(currentMondayStr);
+      
+      // Seed with last 8 weeks
+      for (let i = 1; i <= 8; i++) {
+        const d = new Date(currentMonday);
+        d.setDate(d.getDate() - (i * 7));
+        weeksSet.add(formatDate(d));
+      }
+      
+      // Extract any historical weeks from saved logs
+      cloudLogs.forEach(log => {
+        if (log.date) {
+          const logMonday = getMonday(log.date);
+          weeksSet.add(formatDate(logMonday));
+        }
       });
-
-      roommateSummary.innerHTML = `
-        ${summaryRows.map((row) => `
-          <details class="rounded-3xl border border-white/10 bg-black/40 p-4 transition open:shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-              <div>
-                <div class="text-lg font-medium text-white">${row.friend}</div>
-                <div class="text-[10px] uppercase tracking-[0.4em] text-white/35">Weekly total</div>
-              </div>
-              <div class="text-2xl font-semibold text-neon">${formatCurrency(row.total)}</div>
-            </summary>
-            <div class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-black/50 p-4 text-sm text-white/70">
-              <div class="flex items-center justify-between"><span>Breakfasts</span><span class="text-neon">${row.breakfast}</span></div>
-              <div class="flex items-center justify-between"><span>Lunches</span><span class="text-neon">${row.lunch}</span></div>
-              <div class="flex items-center justify-between"><span>Dinners</span><span class="text-neon">${row.dinner}</span></div>
-            </div>
-          </details>
-        `).join('')}
-      `;
-    }
-
-    function renderMonthlySummary() {
-      // Find all unique months in our cloudLogs
-      const uniqueMonths = Array.from(new Set(
-        cloudLogs
-          .map(log => log.date ? log.date.substring(0, 7) : null)
-          .filter(Boolean)
-      )).sort().reverse();
-
-      if (uniqueMonths.length === 0) {
-        monthlySummary.innerHTML = `
-          <div class="rounded-2xl border border-white/10 bg-black/40 px-4 py-5 text-sm text-white/55 text-center">
-            No logs saved yet. Add entries to populate the monthly summary.
-          </div>
-        `;
-        return;
-      }
-
-      function formatMonthLabel(yearMonthStr) {
-        const [year, month] = yearMonthStr.split('-');
-        const date = new Date(year, month - 1, 1);
-        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      }
-
-      monthlySummary.innerHTML = uniqueMonths.map((yearMonth) => {
-        const monthLogs = cloudLogs.filter(log => log.date && log.date.startsWith(yearMonth));
-
-        const roommateMonthlyRows = friends.map((friend) => {
-          return monthLogs.reduce((accumulator, log) => {
-            const meals = log.meals || {};
-            const roommateNames = Array.isArray(log.roommateNames)
-              ? log.roommateNames
-              : (log.roommateName ? [log.roommateName] : []);
-            
-            const ateThatDay = roommateNames.includes(friend);
-            if (!ateThatDay) {
-              return accumulator;
-            }
-
-            ['breakfast', 'lunch', 'dinner'].forEach((mealKey) => {
-              const meal = meals[mealKey];
-              if (!meal || !meal.checked) {
-                return;
-              }
-
-              accumulator.total += Number(meal.price || 0);
-              accumulator[mealKey] += 1;
-            });
-
-            return accumulator;
-          }, {
-            friend,
-            total: 0,
-            breakfast: 0,
-            lunch: 0,
-            dinner: 0
-          });
-        });
-
-        return `
-          <div class="rounded-3xl border border-white/10 bg-black/30 p-4 mb-4">
-            <h3 class="text-neon text-sm font-semibold tracking-wider uppercase mb-3">${formatMonthLabel(yearMonth)}</h3>
-            <div class="grid gap-3">
-              ${roommateMonthlyRows.map((row) => `
-                <details class="rounded-2xl border border-white/5 bg-black/40 p-4 transition open:shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-                  <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-                    <div>
-                      <div class="text-base font-medium text-white">${row.friend}</div>
-                      <div class="text-[9px] uppercase tracking-[0.4em] text-white/35">Monthly total</div>
-                    </div>
-                    <div class="text-xl font-semibold text-neon">${formatCurrency(row.total)}</div>
-                  </summary>
-                  <div class="mt-4 grid gap-2 rounded-xl border border-white/5 bg-black/50 p-4 text-xs text-white/70">
-                    <div class="flex items-center justify-between"><span>Breakfasts</span><span class="text-neon font-medium">${row.breakfast}</span></div>
-                    <div class="flex items-center justify-between"><span>Lunches</span><span class="text-neon font-medium">${row.lunch}</span></div>
-                    <div class="flex items-center justify-between"><span>Dinners</span><span class="text-neon font-medium">${row.dinner}</span></div>
-                  </div>
-                </details>
-              `).join('')}
-            </div>
-          </div>
-        `;
+      
+      const sortedWeeks = Array.from(weeksSet).sort().reverse();
+      const select = document.getElementById('weekSelector');
+      const previousValue = select.value || currentMondayStr;
+      
+      select.innerHTML = sortedWeeks.map(mondayStr => {
+        const label = getWeekRangeStr(mondayStr);
+        const suffix = (mondayStr === currentMondayStr) ? ' (Current Week)' : '';
+        return `<option value="${mondayStr}">${label}${suffix}</option>`;
       }).join('');
-    }
-
-    function refreshSummaryViews() {
-      updateWeekTotal();
-      renderDaySummary();
-      renderRoommateSummary();
-      renderMonthlySummary();
-    }
-
-    function getSelectedMealKeys() {
-      return mealDefinitions.filter((meal) => mealState[meal.key].checked).map((meal) => meal.key);
-    }
-
-    function syncMealControls() {
-      mealDefinitions.forEach((meal) => {
-        const state = mealState[meal.key];
-        const controls = mealControls[meal.key];
-        controls.checkbox.checked = state.checked;
-        controls.input.value = state.price;
-        controls.input.classList.toggle('text-neon', state.manual);
-        controls.input.classList.toggle('border-neon', state.manual);
-      });
-
-      fullDayToggle.checked = mealDefinitions.every((meal) => mealState[meal.key].checked);
-    }
-
-    function getDefaultDailyRate(selectedMealKeys) {
-      return selectedMealKeys.reduce((sum, key) => {
-        const meal = mealDefinitions.find(m => m.key === key);
-        return sum + (meal ? meal.defaultPrice : 0);
-      }, 0);
-    }
-
-    function updateDailyRate() {
-      const selectedMealKeys = getSelectedMealKeys();
-      const hasManualOverride = selectedMealKeys.some((key) => mealState[key].manual);
-
-      const total = hasManualOverride
-        ? selectedMealKeys.reduce((sum, key) => sum + Number(mealState[key].price || 0), 0)
-        : getDefaultDailyRate(selectedMealKeys);
-
-      dailyRateValue.textContent = total;
-      return total;
-    }
-
-    function setFullDayState(checked) {
-      mealDefinitions.forEach((meal) => {
-        mealState[meal.key].checked = checked;
-        if (checked && !mealState[meal.key].manual) {
-          mealState[meal.key].price = meal.defaultPrice;
-        }
-      });
-
-      syncMealControls();
-      updateDailyRate();
-    }
-
-    function handleMealToggle(mealKey, checked) {
-      mealState[mealKey].checked = checked;
-      if (!checked) {
-        fullDayToggle.checked = false;
-      } else {
-        fullDayToggle.checked = mealDefinitions.every((meal) => mealState[meal.key].checked);
-      }
-
-      if (mealState[mealKey].checked && !mealState[mealKey].manual) {
-        const meal = mealDefinitions.find((item) => item.key === mealKey);
-        mealState[mealKey].price = meal.defaultPrice;
-      }
-
-      syncMealControls();
-      updateDailyRate();
-    }
-
-    function handleMealPriceChange(mealKey, value) {
-      const numericValue = Number(value);
-      if (Number.isNaN(numericValue)) {
-        return;
-      }
-
-      mealState[mealKey].price = numericValue;
-      mealState[mealKey].manual = true;
-      syncMealControls();
-      updateDailyRate();
-    }
-
-    function saveCurrentLog() {
-      const newLog = buildSavePayload();
       
-      if (newLog.roommateNames.length === 0) {
-        saveStatus.textContent = 'Please select at least one roommate.';
-        return;
-      }
-
-      const day = newLog.day;
-      const newRoommates = new Set(newLog.roommateNames);
-      
-      const cleanedLogs = [];
-      cloudLogs.forEach((log) => {
-        if (log.day === day) {
-          const currRoommates = Array.isArray(log.roommateNames)
-            ? log.roommateNames
-            : (log.roommateName ? [log.roommateName] : []);
-            
-          const updatedRoommates = currRoommates.filter(r => !newRoommates.has(r));
-          if (updatedRoommates.length > 0) {
-            const updatedLog = { ...log };
-            updatedLog.roommateNames = updatedRoommates;
-            updatedLog.roommateName = updatedRoommates[0];
-            
-            let mealCost = 0;
-            const meals = updatedLog.meals || {};
-            for (const key in meals) {
-              if (meals[key] && meals[key].checked) {
-                mealCost += Number(meals[key].price || 0);
-              }
-            }
-            updatedLog.totalDailyRate = mealCost * updatedRoommates.length;
-            cleanedLogs.push(updatedLog);
-          }
-        } else {
-          cleanedLogs.push(log);
-        }
-      });
-      
-      cleanedLogs.push(newLog);
-
-      fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(cleanedLogs)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`POST ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(() => fetchCloudLogs())
-      .then(() => {
-        saveStatus.textContent = `Saved ${activeDay} log for ${newLog.roommateNames.length} roommate(s).`;
-      })
-      .catch((error) => {
-        console.error('Cloud save failed', error);
-        saveStatus.textContent = 'Save failed. Check Vercel KV connection.';
-      });
+      select.value = previousValue;
+      activeWeekStart = new Date(select.value + 'T00:00:00');
     }
 
-    function resetCurrentWeek() {
-      if (!confirm("Are you sure you want to clear all log entries for the currently selected week? This cannot be undone.")) {
-        return;
-      }
-      
+    // Main layout rendering: roommate directory and details logs
+    function renderRoommatesList() {
+      const roommatesList = document.getElementById('roommatesList');
+      roommatesList.innerHTML = '';
+
       const startStr = formatDate(activeWeekStart);
       const end = new Date(activeWeekStart);
       end.setDate(end.getDate() + 6);
       const endStr = formatDate(end);
-      
-      // Filter out all logs for this week
-      const cleanedLogs = cloudLogs.filter(log => !log.date || log.date < startStr || log.date > endStr);
 
-      saveStatus.textContent = 'Clearing week...';
-      
-      fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(cleanedLogs)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`POST ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(() => fetchCloudLogs())
-      .then(() => {
-        saveStatus.textContent = 'Week cleared successfully.';
-      })
-      .catch((error) => {
-        console.error('Reset week failed', error);
-        saveStatus.textContent = 'Reset failed. Check connection.';
-      });
-    }
+      // Filter all logs for the currently selected week date range
+      const activeWeekLogs = cloudLogs.filter(log => log.date >= startStr && log.date <= endStr);
 
-    function renderFriends() {
-      friendsGrid.innerHTML = '';
+      friends.forEach(friend => {
+        // Calculate roommate totals and counters for the selected week
+        const roommateLogs = activeWeekLogs.filter(log => log.roommateNames.includes(friend) || log.roommateName === friend);
+        
+        let totalCost = 0;
+        let breakfastCount = 0;
+        let lunchCount = 0;
+        let dinnerCount = 0;
 
-      friends.forEach((friend) => {
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'friend-card flex min-h-28 flex-col justify-between rounded-3xl border border-white/10 bg-black/40 p-4 text-left transition hover:border-neon';
-        card.setAttribute('aria-pressed', selectedFriends.has(friend) ? 'true' : 'false');
-
-        if (selectedFriends.has(friend)) {
-          card.classList.add('active-card');
-        }
-
-        card.innerHTML = `
-          <div class="flex items-center justify-between gap-3">
-            <div class="text-base font-medium">${friend}</div>
-            <div class="grid h-6 w-6 place-items-center rounded-full border border-white/20 text-[11px] text-white/80">
-              ${selectedFriends.has(friend) ? '✓' : ''}
-            </div>
-          </div>
-          <div class="text-sm text-white/45">Tap to toggle selection</div>
-        `;
-
-        card.addEventListener('click', () => {
-          if (selectedFriends.has(friend)) {
-            selectedFriends.delete(friend);
-          } else {
-            selectedFriends.add(friend);
+        roommateLogs.forEach(log => {
+          const meals = log.meals || {};
+          if (meals.breakfast && meals.breakfast.checked) {
+            totalCost += Number(meals.breakfast.price || 0);
+            breakfastCount++;
           }
-          renderFriends();
-          updateFriendCount();
+          if (meals.lunch && meals.lunch.checked) {
+            totalCost += Number(meals.lunch.price || 0);
+            lunchCount++;
+          }
+          if (meals.dinner && meals.dinner.checked) {
+            totalCost += Number(meals.dinner.price || 0);
+            dinnerCount++;
+          }
         });
 
-        friendsGrid.appendChild(card);
+        const expanded = expandedRoommates.has(friend);
+
+        // Build roommate card element
+        const card = document.createElement('div');
+        card.className = `border rounded-3xl bg-panel p-6 transition duration-200 ${
+          expanded ? 'border-neon/40 shadow-[0_0_16px_rgba(0,242,254,0.06)]' : 'border-white/10 hover:border-white/20'
+        }`;
+
+        // Header (Toggles expanded state)
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between cursor-pointer select-none';
+        header.innerHTML = `
+          <div>
+            <h3 class="text-lg font-bold text-white">${friend}</h3>
+            <p class="text-[9px] uppercase tracking-wider text-white/40 mt-0.5">Roommate Summary</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-xl font-extrabold text-neon">${formatCurrency(totalCost)}</span>
+            <span class="text-white/40 text-xs transition-transform duration-200 transform ${expanded ? 'rotate-180' : ''}">▼</span>
+          </div>
+        `;
+        header.addEventListener('click', () => {
+          if (expandedRoommates.has(friend)) {
+            expandedRoommates.delete(friend);
+          } else {
+            expandedRoommates.add(friend);
+          }
+          renderRoommatesList();
+        });
+        card.appendChild(header);
+
+        // Expanded Body (Shows logs grids and counters)
+        if (expanded) {
+          const body = document.createElement('div');
+          body.className = 'mt-6 border-t border-white/5 pt-6';
+          
+          // Counters UI
+          let countersHtml = `
+            <div class="grid grid-cols-3 gap-2.5 mb-6 text-center">
+              <div class="bg-black/35 rounded-2xl py-3 border border-white/5">
+                <div class="text-[9px] uppercase tracking-wider text-white/40">Breakfasts</div>
+                <div class="text-base font-bold text-neon mt-0.5">${breakfastCount}</div>
+              </div>
+              <div class="bg-black/35 rounded-2xl py-3 border border-white/5">
+                <div class="text-[9px] uppercase tracking-wider text-white/40">Lunches</div>
+                <div class="text-base font-bold text-neon mt-0.5">${lunchCount}</div>
+              </div>
+              <div class="bg-black/35 rounded-2xl py-3 border border-white/5">
+                <div class="text-[9px] uppercase tracking-wider text-white/40">Dinners</div>
+                <div class="text-base font-bold text-neon mt-0.5">${dinnerCount}</div>
+              </div>
+            </div>
+          `;
+
+          // Weekly logs list (Monday to Sunday checkable checkboxes)
+          let daysHtml = days.map((dayName, idx) => {
+            const d = new Date(activeWeekStart);
+            d.setDate(d.getDate() + idx);
+            const dateStr = formatDate(d);
+            const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            // Find if there is an existing log for this roommate on this date
+            const existingDayLog = roommateLogs.find(log => log.date === dateStr);
+            
+            const bChecked = existingDayLog?.meals?.breakfast?.checked || false;
+            const bPrice = existingDayLog?.meals?.breakfast?.price ?? 40;
+            
+            const lChecked = existingDayLog?.meals?.lunch?.checked || false;
+            const lPrice = existingDayLog?.meals?.lunch?.price ?? 60;
+            
+            const dChecked = existingDayLog?.meals?.dinner?.checked || false;
+            const dPrice = existingDayLog?.meals?.dinner?.price ?? 40;
+
+            return `
+              <div class="flex flex-col gap-2 p-3 bg-black/25 rounded-2xl border border-white/5">
+                <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-1">
+                  <span class="font-bold text-xs text-white/90">${dayName}</span>
+                  <span class="text-[9px] uppercase tracking-wider text-white/40">${dateLabel}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  
+                  <!-- Breakfast -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input type="checkbox" id="chk-${friend}-${dateStr}-breakfast" ${bChecked ? 'checked' : ''} class="h-3.5 w-3.5 rounded border-white/10 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+                      <span class="text-[10px] text-white/70">Breakfast</span>
+                    </label>
+                    <input type="number" id="val-${friend}-${dateStr}-breakfast" value="${bPrice}" min="0" step="1" class="w-full bg-black/50 border border-white/10 rounded-xl px-2 py-1 text-[10px] text-right text-white focus:border-neon outline-none" />
+                  </div>
+                  
+                  <!-- Lunch -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input type="checkbox" id="chk-${friend}-${dateStr}-lunch" ${lChecked ? 'checked' : ''} class="h-3.5 w-3.5 rounded border-white/10 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+                      <span class="text-[10px] text-white/70">Lunch</span>
+                    </label>
+                    <input type="number" id="val-${friend}-${dateStr}-lunch" value="${lPrice}" min="0" step="1" class="w-full bg-black/50 border border-white/10 rounded-xl px-2 py-1 text-[10px] text-right text-white focus:border-neon outline-none" />
+                  </div>
+                  
+                  <!-- Dinner -->
+                  <div class="flex flex-col gap-1.5">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input type="checkbox" id="chk-${friend}-${dateStr}-dinner" ${dChecked ? 'checked' : ''} class="h-3.5 w-3.5 rounded border-white/10 bg-black text-neon focus:ring-neon" style="accent-color:#00f2fe" />
+                      <span class="text-[10px] text-white/70">Dinner</span>
+                    </label>
+                    <input type="number" id="val-${friend}-${dateStr}-dinner" value="${dPrice}" min="0" step="1" class="w-full bg-black/50 border border-white/10 rounded-xl px-2 py-1 text-[10px] text-right text-white focus:border-neon outline-none" />
+                  </div>
+                  
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          body.innerHTML = `
+            ${countersHtml}
+            <div class="text-[10px] uppercase tracking-wider text-white/35 font-bold mb-2">Logs Sheet</div>
+            <div class="flex flex-col gap-3">
+              ${daysHtml}
+            </div>
+            
+            <div class="mt-6 flex flex-col gap-2">
+              <button id="btn-save-${friend}" type="button" onclick="saveRoommateWeek('${friend}')" class="w-full rounded-2xl border border-neon bg-neon/15 px-4 py-3 text-xs font-bold text-neon shadow-[0_0_12px_rgba(0,242,254,0.02)] hover:bg-neon/25 transition duration-200">
+                Save Logs for ${friend}
+              </button>
+              <div id="status-${friend}" class="text-[9px] uppercase tracking-wider text-center text-white/40 min-h-[14px] mt-1"></div>
+            </div>
+          `;
+          card.appendChild(body);
+        }
+
+        roommatesList.appendChild(card);
       });
     }
 
-    openSidebarBtn.addEventListener('click', openSidebarMenu);
-    closeSidebarBtn.addEventListener('click', closeSidebarMenu);
-    overlay.addEventListener('click', closeSidebarMenu);
+    // Handles saving roommate's weekly logs compiled into JSON payload
+    async function saveRoommateWeek(friend) {
+      const statusLabel = document.getElementById(`status-${friend}`);
+      const saveBtn = document.getElementById(`btn-save-${friend}`);
+      
+      statusLabel.textContent = 'Saving...';
+      statusLabel.className = 'text-[9px] uppercase tracking-wider text-center text-neon animate-pulse mt-1';
+      saveBtn.disabled = true;
 
-    navLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        setActiveView(link.dataset.view);
-        closeSidebarMenu();
-      });
-    });
+      const startStr = formatDate(activeWeekStart);
+      const end = new Date(activeWeekStart);
+      end.setDate(end.getDate() + 6);
+      const endStr = formatDate(end);
 
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        closeSidebarMenu();
+      const newLogsForFriend = [];
+
+      // Compile checkboxes and pricing inputs for all 7 days
+      for (let idx = 0; idx < 7; idx++) {
+        const d = new Date(activeWeekStart);
+        d.setDate(d.getDate() + idx);
+        const dateStr = formatDate(d);
+        const dayName = days[idx];
+
+        const chkBreakfast = document.getElementById(`chk-${friend}-${dateStr}-breakfast`).checked;
+        const valBreakfast = Number(document.getElementById(`val-${friend}-${dateStr}-breakfast`).value || 40);
+
+        const chkLunch = document.getElementById(`chk-${friend}-${dateStr}-lunch`).checked;
+        const valLunch = Number(document.getElementById(`val-${friend}-${dateStr}-lunch`).value || 60);
+
+        const chkDinner = document.getElementById(`chk-${friend}-${dateStr}-dinner`).checked;
+        const valDinner = Number(document.getElementById(`val-${friend}-${dateStr}-dinner`).value || 40);
+
+        if (chkBreakfast || chkLunch || chkDinner) {
+          let dailyRate = 0;
+          if (chkBreakfast) dailyRate += valBreakfast;
+          if (chkLunch) dailyRate += valLunch;
+          if (chkDinner) dailyRate += valDinner;
+
+          newLogsForFriend.push({
+            day: dayName,
+            date: dateStr,
+            roommateNames: [friend],
+            roommateName: friend,
+            meals: {
+              breakfast: { checked: chkBreakfast, price: valBreakfast },
+              lunch: { checked: chkLunch, price: valLunch },
+              dinner: { checked: chkDinner, price: valDinner }
+            },
+            prices: {
+              breakfast: valBreakfast,
+              lunch: valLunch,
+              dinner: valDinner
+            },
+            totalDailyRate: dailyRate,
+            savedAt: new Date().toISOString()
+          });
+        }
       }
-    });
 
-    renderDays();
-    renderFriends();
-    updateFriendCount();
-    syncMealControls();
-    updateDailyRate();
-    updateWeekDisplay();
-    refreshSummaryViews();
-    setActiveView('home');
-    selectedDayLabel.textContent = activeDay;
-
-    // Week navigation listeners
-    prevWeekBtn.addEventListener('click', () => {
-      activeWeekStart.setDate(activeWeekStart.getDate() - 7);
-      updateWeekDisplay();
-      refreshSummaryViews();
-    });
-
-    nextWeekBtn.addEventListener('click', () => {
-      activeWeekStart.setDate(activeWeekStart.getDate() + 7);
-      updateWeekDisplay();
-      refreshSummaryViews();
-    });
-
-    resetWeekBtn.addEventListener('click', resetCurrentWeek);
-
-    fullDayToggle.addEventListener('change', () => {
-      setFullDayState(fullDayToggle.checked);
-    });
-
-    mealDefinitions.forEach((meal) => {
-      mealControls[meal.key].checkbox.addEventListener('change', (event) => {
-        handleMealToggle(meal.key, event.target.checked);
+      // Filter out target roommate's logs inside selected week to avoid duplicates
+      const otherLogs = cloudLogs.filter(log => {
+        const isTargetFriend = log.roommateNames.includes(friend) || log.roommateName === friend;
+        const isTargetWeek = log.date >= startStr && log.date <= endStr;
+        return !(isTargetFriend && isTargetWeek);
       });
 
-      mealControls[meal.key].input.addEventListener('input', (event) => {
-        handleMealPriceChange(meal.key, event.target.value);
-      });
+      const updatedLogs = [...otherLogs, ...newLogsForFriend];
+
+      try {
+        const response = await fetch(API_SAVE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedLogs)
+        });
+
+        if (!response.ok) throw new Error(`POST ${response.status}`);
+
+        // Re-fetch database state to trigger UI updates
+        await fetchCloudLogs();
+        
+        statusLabel.textContent = 'Saved Successfully!';
+        statusLabel.className = 'text-[9px] uppercase tracking-wider text-center text-neon mt-1';
+        setTimeout(() => {
+          statusLabel.textContent = '';
+        }, 3000);
+      } catch (error) {
+        console.error('Failed to save roommate week logs:', error);
+        statusLabel.textContent = 'Save Failed';
+        statusLabel.className = 'text-[9px] uppercase tracking-wider text-center text-red-400 mt-1';
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    // Set dropdown change handler
+    document.getElementById('weekSelector').addEventListener('change', (e) => {
+      activeWeekStart = new Date(e.target.value + 'T00:00:00');
+      renderRoommatesList();
     });
 
-    saveLogBtn.addEventListener('click', saveCurrentLog);
-
+    // Initialize layout on window load
     window.addEventListener('load', () => {
-      fetchCloudLogs().catch((error) => {
-        console.error('Initial cloud load failed', error);
-        saveStatus.textContent = 'Cloud sync unavailable on load.';
-      });
+      buildWeekSelectorOptions();
+      fetchCloudLogs();
     });
   </script>
 </body>
