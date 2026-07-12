@@ -1,4 +1,27 @@
 import { kv } from '@vercel/kv';
+import Redis from 'ioredis';
+
+let dbClient = null;
+
+if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  // Use Vercel KV if environment variables are present
+  dbClient = {
+    get: async (key) => kv.get(key),
+    set: async (key, val) => kv.set(key, val)
+  };
+} else if (process.env.REDIS_URL) {
+  // Fall back to standard Redis if REDIS_URL is present
+  const redisClient = new Redis(process.env.REDIS_URL);
+  dbClient = {
+    get: async (key) => {
+      const raw = await redisClient.get(key);
+      return raw ? JSON.parse(raw) : null;
+    },
+    set: async (key, val) => {
+      return redisClient.set(key, JSON.stringify(val));
+    }
+  };
+}
 
 export default async function handler(req, res) {
   // Set CORS headers for compatibility
@@ -9,6 +32,13 @@ export default async function handler(req, res) {
   // Handle preflight options request
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
+  }
+
+  if (!dbClient) {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Database connection configuration missing. Please set either REDIS_URL or KV_REST_API_URL/KV_REST_API_TOKEN environment variables.'
+    });
   }
 
   try {
@@ -27,8 +57,8 @@ export default async function handler(req, res) {
         }
       }
 
-      // Store in Vercel KV
-      await kv.set('mess_bill_data', payload);
+      // Store in DB
+      await dbClient.set('mess_bill_data', payload);
       
       return res.status(200).json({
         status: 'success',
@@ -37,7 +67,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'GET') {
-      const data = await kv.get('mess_bill_data');
+      const data = await dbClient.get('mess_bill_data');
       
       // Handle missing data states gracefully
       if (!data) {
@@ -55,7 +85,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Vercel KV Sync error:', error);
+    console.error('Database Sync error:', error);
     return res.status(500).json({
       status: 'error',
       message: error.message || 'Internal Server Error'
