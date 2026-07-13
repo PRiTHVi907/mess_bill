@@ -643,22 +643,24 @@
 
         dayLogs.forEach(log => {
           const meals = log.meals || {};
-          const roommateName = log.roommateName || log.roommateNames?.[0] || '';
+          const currentRoommates = Array.isArray(log.roommateNames) && log.roommateNames.length > 0
+            ? log.roommateNames
+            : (log.roommateName ? [log.roommateName] : []);
           
-          if (roommateName) {
+          currentRoommates.forEach(name => {
             if (meals.breakfast && meals.breakfast.checked) {
               breakfastCost += Number(meals.breakfast.price || 0);
-              breakfastRoommates.push(roommateName);
+              breakfastRoommates.push(name);
             }
             if (meals.lunch && meals.lunch.checked) {
               lunchCost += Number(meals.lunch.price || 0);
-              lunchRoommates.push(roommateName);
+              lunchRoommates.push(name);
             }
             if (meals.dinner && meals.dinner.checked) {
               dinnerCost += Number(meals.dinner.price || 0);
-              dinnerRoommates.push(roommateName);
+              dinnerRoommates.push(name);
             }
-          }
+          });
         });
 
         const dayTotal = breakfastCost + lunchCost + dinnerCost;
