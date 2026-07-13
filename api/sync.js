@@ -23,53 +23,6 @@ if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
   };
 }
 
-async function sendWhatsAppNotification(log) {
-  const instanceId = process.env.GREENAPI_INSTANCE;
-  const apiToken = process.env.GREENAPI_TOKEN;
-  const chatId = process.env.WA_GROUP_ID;
-
-  if (!instanceId || !apiToken || !chatId) {
-    console.warn('Green-API credentials or WA_GROUP_ID missing. Skipping WhatsApp notification.');
-    return;
-  }
-
-  const roommateName = Array.isArray(log.roommateNames) ? log.roommateNames.join(', ') : log.roommateName;
-  const mealsList = Object.keys(log.meals || {})
-    .filter(k => log.meals[k] && log.meals[k].checked)
-    .map(k => k.charAt(0).toUpperCase() + k.slice(1))
-    .join(', ');
-
-  const dayNames = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
-  const dayName = dayNames[log.day] || log.day;
-  const totalCost = log.totalDailyRate || 0;
-
-  const messageBody = `📝 *Mess Bill Alert!* ${roommateName} logged data for ${dayName}.\nMeals: ${mealsList}\nCost added: ${totalCost} INR.`;
-
-  const url = `https://api.green-api.com/waInstance${instanceId}/sendMessage/${apiToken}`;
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        chatId: chatId,
-        message: messageBody
-      })
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('Green-API notification failed:', errorText);
-    } else {
-      console.log('WhatsApp Green-API notification sent successfully for:', roommateName);
-    }
-  } catch (error) {
-    console.error('Failed to trigger Green-API:', error);
-  }
-}
-
 export default async function handler(req, res) {
   // Set CORS headers for compatibility
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -107,24 +60,6 @@ export default async function handler(req, res) {
       // Store in DB
       await dbClient.set('mess_bill_data', payload);
       
-      // Trigger Green-API notifications for new logs asynchronously (non-blocking)
-      try {
-        const now = new Date().getTime();
-        const recentLogs = (payload || []).filter(log => {
-          if (!log.savedAt) return false;
-          const diff = now - new Date(log.savedAt).getTime();
-          return diff >= 0 && diff < 15000; // logs saved in last 15 seconds
-        });
-
-        if (recentLogs.length > 0) {
-          Promise.allSettled(recentLogs.map(sendWhatsAppNotification)).then(() => {
-            console.log('Finished processing WhatsApp group notifications.');
-          });
-        }
-      } catch (err) {
-        console.error('Error scheduling Green-API notifications:', err);
-      }
-
       return res.status(200).json({
         status: 'success',
         message: 'Saved successfully'
