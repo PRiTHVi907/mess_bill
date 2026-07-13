@@ -929,11 +929,11 @@
         return sum;
       }, 0);
 
-      const newLog = {
+      const newLogs = selectedRoommates.map(friend => ({
         day: activeDay,
         date: activeDateStr,
-        roommateNames: selectedRoommates,
-        roommateName: selectedRoommates[0] || '',
+        roommateNames: [friend],
+        roommateName: friend,
         meals: mealSnapshot,
         prices: mealDefinitions.reduce((snapshot, meal) => {
           snapshot[meal.key] = Number(mealState[meal.key].price || 0);
@@ -941,7 +941,7 @@
         }, {}),
         totalDailyRate: dailyPriceSum,
         savedAt: new Date().toISOString()
-      };
+      }));
 
       saveStatus.textContent = 'Saving...';
       saveStatus.className = 'text-center text-[10px] uppercase tracking-wider text-neon animate-pulse';
@@ -978,7 +978,7 @@
         }
       });
 
-      cleanedLogs.push(newLog);
+      cleanedLogs.push(...newLogs);
 
       fetch(API_SAVE_URL, {
         method: 'POST',
@@ -995,6 +995,12 @@
       .then(() => {
         saveStatus.textContent = `Saved ${activeDay} log for ${selectedRoommates.length} roommate(s).`;
         saveStatus.className = 'text-center text-[10px] uppercase tracking-wider text-neon';
+        
+        // Clear selection to avoid confusion
+        selectedFriends.clear();
+        renderFriends();
+        updateFriendCount();
+
         setTimeout(() => {
           saveStatus.textContent = '';
         }, 3000);
