@@ -24,12 +24,12 @@ if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
 }
 
 async function sendWhatsAppNotification(log) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const to = process.env.TWILIO_TO_NUMBER;
-  
-  if (!accountSid || !authToken || !to) {
-    console.warn('Twilio credentials missing. Skipping WhatsApp notification.');
+  const instanceId = process.env.GREENAPI_INSTANCE;
+  const apiToken = process.env.GREENAPI_TOKEN;
+  const chatId = process.env.WA_GROUP_ID;
+
+  if (!instanceId || !apiToken || !chatId) {
+    console.warn('Green-API credentials or WA_GROUP_ID missing. Skipping WhatsApp notification.');
     return;
   }
 
@@ -37,41 +37,36 @@ async function sendWhatsAppNotification(log) {
   const mealsList = Object.keys(log.meals || {})
     .filter(k => log.meals[k] && log.meals[k].checked)
     .map(k => k.charAt(0).toUpperCase() + k.slice(1))
-    .join(' + ');
+    .join(', ');
 
   const dayNames = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
   const dayName = dayNames[log.day] || log.day;
   const totalCost = log.totalDailyRate || 0;
 
-  const messageBody = `${roommateName} logged ${mealsList} for ${dayName} (${totalCost} INR).`;
-  const from = process.env.TWILIO_FROM_NUMBER || '+14155238886';
+  const messageBody = `📝 *Mess Bill Alert!* ${roommateName} logged data for ${dayName}.\nMeals: ${mealsList}\nCost added: ${totalCost} INR.`;
 
-  const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-  const authHeader = `Basic ${Buffer.from(accountSid + ':' + authToken).toString('base64')}`;
-
-  const params = new URLSearchParams();
-  params.append('From', `whatsapp:${from}`);
-  params.append('To', `whatsapp:${to}`);
-  params.append('Body', messageBody);
+  const url = `https://api.green-api.com/waInstance${instanceId}/sendMessage/${apiToken}`;
 
   try {
-    const res = await fetch(twilioUrl, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       },
-      body: params.toString()
+      body: JSON.stringify({
+        chatId: chatId,
+        message: messageBody
+      })
     });
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('Twilio notification failed:', errorText);
+      console.error('Green-API notification failed:', errorText);
     } else {
-      console.log('WhatsApp notification sent successfully for:', roommateName);
+      console.log('WhatsApp Green-API notification sent successfully for:', roommateName);
     }
   } catch (error) {
-    console.error('Failed to trigger Twilio API:', error);
+    console.error('Failed to trigger Green-API:', error);
   }
 }
 
@@ -112,7 +107,7 @@ export default async function handler(req, res) {
       // Store in DB
       await dbClient.set('mess_bill_data', payload);
       
-      // Trigger notifications for new logs asynchronously (non-blocking)
+      // Trigger Green-API notifications for new logs asynchronously (non-blocking)
       try {
         const now = new Date().getTime();
         const recentLogs = (payload || []).filter(log => {
@@ -123,11 +118,11 @@ export default async function handler(req, res) {
 
         if (recentLogs.length > 0) {
           Promise.allSettled(recentLogs.map(sendWhatsAppNotification)).then(() => {
-            console.log('Finished processing WhatsApp notifications.');
+            console.log('Finished processing WhatsApp group notifications.');
           });
         }
       } catch (err) {
-        console.error('Error scheduling WhatsApp notifications:', err);
+        console.error('Error scheduling Green-API notifications:', err);
       }
 
       return res.status(200).json({
